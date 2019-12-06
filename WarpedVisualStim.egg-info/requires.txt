@@ -1,0 +1,13 @@
+pyglet
+tifffile
+PyDAQmx
+configobj
+pillow
+h5py
+scikit-image
+pytest
+psychopy
+opencv-python
+matplotlib
+scipy
+numpy

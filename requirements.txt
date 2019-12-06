@@ -1,0 +1,15 @@
+numpy
+scipy
+matplotlib
+opencv-python
+psychopy
+pytest
+scikit-image
+h5py
+pillow
+configobj
+PyDAQmx
+tifffile
+pyglet
+# numpydoc
+# sphinx
