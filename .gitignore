@@ -58,6 +58,6 @@ crashlytics-build.properties
 
 build/
 dis/
-retinotopic_mapping.egg-info/
+#WarpedVisualStim.egg-info/
 *.egg
 
