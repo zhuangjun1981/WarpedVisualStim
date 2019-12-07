@@ -22,11 +22,11 @@ http://zone.ni.com/reference/en-XX/help/370471W-01/
 
 import logging
 
+import PyDAQmx
 from PyDAQmx import Task
 from PyDAQmx.DAQmxConstants import *
-from PyDAQmx.DAQmxFunctions import *
-from PyDAQmx.DAQmxFunctions import function_dict, function_list
 import PyDAQmx.DAQmxFunctions as DAQmxFunctions
+from PyDAQmx.DAQmxFunctions import function_dict, function_list
 from numpy import zeros, sin, arange, pi, array, ones
 import numpy as np
 from ctypes import c_long, c_ulong, CFUNCTYPE, POINTER
@@ -190,7 +190,7 @@ class Device(object):
 
     def reset(self):
         return self.ResetDevice()
-        
+
 for function_name in device_func_list:
     name = function_name[5:]
     func = getattr(DAQmxFunctions, function_name)
@@ -235,7 +235,7 @@ class BaseTask(Task):
                            DAQmx_Val_ChanForAllLines)
         >>> bt.start()
         >>> buf = np.array([0,1,0,1], dtype=np.uint8)
-        >>> bt.WriteDigitalLines(1, 0, 10.0, DAQmx_Val_GroupByChannel, buf,
+        >>> bt.WriteDigitalLines(1, 0, 10.0, PyDAQmx.DAQmx_Val_GroupByChannel, buf,
                                 None, None)
         >>> bt.stop()
         >>> bt.clear()
@@ -265,7 +265,7 @@ class BaseTask(Task):
             self.stop()
         except Exception as e:
             ##TODO: catch specific type
-            print e
+            print(e)
             pass
         self.ClearTask()
 
@@ -332,7 +332,7 @@ class BaseTask(Task):
             self.ResetSampClkTimebaseDiv()
         elif divisor > 1:
             self.SetSampClkTimebaseDiv(divisor)
-            print divisor
+            print(divisor)
         else:
             raise ValueError("Divisor must be between 1 and 2^32")
 
@@ -435,14 +435,14 @@ class AnalogInput(BaseTask):
     >>> ai.start()
     >>> for x in range(10):
     ...     time.sleep(1) #collects some data
-    ...     print ai.data #prints the current buffer
+    ...     print(ai.data) #prints the current buffer
     >>> ai.clear()
 
     '''
     def __init__(self,
                  device='Dev1',
                  channels=[0],
-                 buffer_size=500, 
+                 buffer_size=500,
                  clock_speed=10000.0,
                  terminal_config="RSE",
                  voltage_range=[-10.0, 10.0],
@@ -526,7 +526,7 @@ class AnalogInput(BaseTask):
             samples are read.
         """
         try:
-            read = int32()
+            read = DAQmxFunctions.int32()
             # read into the data buffer
             self.ReadAnalogF64(self.buffer_size, self.timeout, DAQmx_Val_Auto,
                 self.data, (self.buffer_size*len(self.channels)), byref(read),
@@ -542,7 +542,7 @@ class AnalogInput(BaseTask):
         """
         Syncrhonous read.
         """
-        read = int32()
+        read = DAQmxFunctions.int32()
         output_size = len(self.channels)*samples
         output_array = np.zeros((len(self.channels), samples), dtype=np.float64)
         self.ReadAnalogF64(samples, self.timeout, DAQmx_Val_GroupByScanNumber,
@@ -562,7 +562,7 @@ class AnalogInput(BaseTask):
 
 class AnalogOutput(BaseTask):
     '''
-    Analog Output task.  
+    Analog Output task.
         Writes arrays of float64's to an analog output channel at a specified sample rate.
         Value remains until changed, even after task is cleared.
 
@@ -714,7 +714,7 @@ class AnalogFunctionOutput(BaseTask):
         BaseTask.__init__(self)
 
         self.voltage_range = voltage_range
-        
+
         buffer_size = sample_rate # if these are not equal, the frequency will be wrong
 
         #create dev str for various channels
@@ -723,7 +723,7 @@ class AnalogFunctionOutput(BaseTask):
             channels = [channels]
         for channel in channels:
             self.devstr += str(device) + "/ao" + str(channel) + ","
-        self.devstr = self.devstr[:-1]        
+        self.devstr = self.devstr[:-1]
 
         # I HAD TO MOVE THIS HERE BECAUSE MKL MESSES WITH WINDOWS API EVENTS
         # LIKE CTRL-C
@@ -771,7 +771,7 @@ class AnalogFunctionOutput(BaseTask):
 
 class DigitalInput(BaseTask):
     '''
-    Gets the state of the inputs from the NIDAQ Device/port specified. 
+    Gets the state of the inputs from the NIDAQ Device/port specified.
 
     Parameters
     ----------
@@ -813,7 +813,7 @@ class DigitalInput(BaseTask):
         self.port = port
         self.device = device
 
-        if lines is not "":
+        if lines != "":
             if isinstance(lines, int):
                 start, end = str(lines), str(lines)
             elif isinstance(lines, str):
@@ -827,8 +827,8 @@ class DigitalInput(BaseTask):
             lines = self.get_input_lines()
             self.no_lines = len(lines)
             self.devstr = str(device) + "/port" + str(port) + "/line0:" + str(self.no_lines-1)
-        
-        #print self.devstr
+
+        #print(self.devstr)
 
         #create channel
         self.CreateDIChan(self.devstr, "", DAQmx_Val_ChanForAllLines)
@@ -848,7 +848,7 @@ class DigitalInput(BaseTask):
             uint8 array.
 
         Example:
-            >>> print di.read()
+            >>> print(di.read())
             [0 1 0 1 0 1 0 1]
         """
         bytesPerSample = c_long()
@@ -989,7 +989,7 @@ class DigitalInputU32(BaseTask):
             current buffer off of the DAQ.  Writes the samples to disk if
             a binary output file was specified.
         """
-        read = int32()
+        read = DAQmxFunctions.int32()
         self.ReadDigitalU32(self.buffer_size, self.timeout, DAQmx_Val_Auto,
                             self.data, self.buffer_size, byref(read), None)
         if self.binary:
@@ -1022,7 +1022,7 @@ class DigitalInputU32(BaseTask):
 class DigitalOutput(BaseTask):
 
     '''
-    Sets the current output state of all digital lines.  
+    Sets the current output state of all digital lines.
 
     Parameters
     ----------
@@ -1061,8 +1061,8 @@ class DigitalOutput(BaseTask):
 
     '''
 
-    def __init__(self, 
-                 device='Dev1', 
+    def __init__(self,
+                 device='Dev1',
                  port=0,
                  lines="",
                  timeout=10.0,
@@ -1076,7 +1076,7 @@ class DigitalOutput(BaseTask):
         self.device = device
         self.initial_state = initial_state
 
-        if lines is not "":
+        if lines != "":
             if isinstance(lines, int):
                 start, end = str(lines), str(lines)
             elif isinstance(lines, str):
@@ -1303,7 +1303,7 @@ class EventInput(BaseTask):
     ----------
     device : str
         Device ID for NIDAQ board.  Default "Dev1"
-    bits : int 
+    bits : int
         How many lines to read. Default 32
     event_lines : list of ints
         Which lines should trigger a change event.  Default [0]
@@ -1331,7 +1331,7 @@ class EventInput(BaseTask):
         self.device = device
         self.event_lines = event_lines  #
         self.timeout = timeout  #should this even have a timeout?
-        
+
         self.bits = bits
         self.data = c_ulong()
 
@@ -1463,7 +1463,7 @@ class CounterInputU32(BaseTask):
             self.register_sample_callback(self.buffer_size)
 
         self.data = np.zeros(self.buffer_size, dtype=np.uint32)
-        
+
         if file_type == 'bin':
             self.output_file = open(path, 'wb')
         else:
@@ -1475,7 +1475,7 @@ class CounterInputU32(BaseTask):
             samples are read if buffered reading is enabled.
         """
         try:
-            read = int32()
+            read = DAQmxFunctions.int32()
 
             # read into the data buffer
             self.ReadCounterU32(self.buffer_size, self.timeout, self.data,
@@ -1989,4 +1989,4 @@ if __name__ == '__main__':
 
     import numpy as np
     data = np.fromfile(file_name, dtype=np.uint32)
-    print data
+    print(data)

@@ -58,6 +58,6 @@ crashlytics-build.properties
 
 build/
 dis/
-#WarpedVisualStim.egg-info/
+WarpedVisualStim.egg-info/
 *.egg
 
