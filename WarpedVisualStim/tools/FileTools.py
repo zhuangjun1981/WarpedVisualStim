@@ -4,12 +4,12 @@ import numpy as np
 import pickle
 import os
 import shutil
-import ImageAnalysis as ia
+from . import ImageAnalysis as ia
 
 try:
-    import skimage.external.tifffile as tf
-except ImportError:
     import tifffile as tf
+except ImportError:
+    import skimage.external.tifffile as tf
 
 try:
     import cv2
@@ -19,12 +19,12 @@ except ImportError as e:
 
 def saveFile(path, data):
     with open(path, 'wb') as f:
-        pickle.dump(data, f)
+        pickle.dump(data, f, protocol=2)
 
 
 def loadFile(path):
     with open(path, 'rb') as f:
-        data = pickle.load(f)
+        data = pickle.load(f, encoding='bytes')
     return data
 
 
@@ -36,21 +36,22 @@ def copy(src, dest):
     """
 
     if os.path.isfile(src):
-        print 'Source is a file. Starting copy...'
+        print('Source is a file. Starting copy...')
         try:
-            shutil.copy(src, dest); print 'End of copy.'
+            shutil.copy(src, dest)
+            print('End of copy.')
         except Exception as error:
-            print error
+            print(error)
 
     elif os.path.isdir(src):
-        print 'Source is a directory. Starting copy...'
+        print('Source is a directory. Starting copy...')
         try:
-            shutil.copytree(src, dest); print 'End of copy.'
+            shutil.copytree(src, dest)
+            print('End of copy.')
         except Exception as error:
-            print error
-
+            print(error)
     else:
-        raise IOError, 'Source is neither a file or a directory. Can not be copied!'
+        raise IOError('Source is neither a file or a directory. Can not be copied!')
 
 
 def list_all_files(folder):
@@ -75,42 +76,46 @@ def batchCopy(pathList, destinationFolder, isDelete=False):
     unCopied = []
 
     for path in pathList:
-        print '\nStart copying ' + path + ' ...'
+        print('\nStart copying ' + path + ' ...')
         if os.path.isfile(path):
-            print 'This path is a file. Keep copying ...'
+            print('This path is a file. Keep copying ...')
             try:
                 shutil.copy(path, destinationFolder)
-                print 'End of copying.'
+                print('End of copying.')
                 if isDelete:
-                    print 'Deleting this file ...'
+                    print('Deleting this file ...')
                     try:
-                        os.remove(path); print 'End of deleting.\n'
+                        os.remove(path)
+                        print('End of deleting.\n')
                     except Exception as error:
-                        print 'Can not delete this file.\nError message:\n' + str(error) + '\n'
+                        print('Can not delete this file.\nError message:\n' + str(error) + '\n')
                 else:
-                    print ''
+                    print('')
             except Exception as error:
-                unCopied.append(path);print 'Can not copy this file.\nError message:\n' + str(error) + '\n'
+                unCopied.append(path)
+                print('Can not copy this file.\nError message:\n' + str(error) + '\n')
 
         elif os.path.isdir(path):
-            print 'This path is a directory. Keep copying ...'
+            print('This path is a directory. Keep copying ...')
             try:
                 _, folderName = os.path.split(path)
                 shutil.copytree(path, os.path.join(destinationFolder, folderName))
-                print 'End of copying.'
+                print('End of copying.')
                 if isDelete:
-                    print 'Deleting this directory ...'
+                    print('Deleting this directory ...')
                     try:
-                        shutil.rmtree(path); print 'End of deleting.\n'
+                        shutil.rmtree(path)
+                        print('End of deleting.\n')
                     except Exception as error:
-                        print 'Can not delete this directory.\nError message:\n' + str(error) + '\n'
+                        print('Can not delete this directory.\nError message:\n' + str(error) + '\n')
                 else:
-                    print ''
+                    print('')
             except Exception as error:
-                unCopied.append(path);print 'Can not copy this directory.\nError message:\n' + str(error) + '\n'
+                unCopied.append(path)
+                print('Can not copy this directory.\nError message:\n' + str(error) + '\n')
         else:
             unCopied.append(path)
-            print 'This path is neither a file or a directory. Skip!\n'
+            print('This path is neither a file or a directory. Skip!\n')
 
     return unCopied
 
@@ -154,10 +159,10 @@ def importRawJCam(path,
 
     imageFile = imageFile[headerLength:]
 
-    print 'width =', str(columnNum), 'pixels'
-    print 'height =', str(rowNum), 'pixels'
-    print 'length =', str(frameNum), 'frame(s)'
-    print 'exposure time =', str(exposureTime), 'ms'
+    print('width =', str(columnNum), 'pixels')
+    print('height =', str(rowNum), 'pixels')
+    print('length =', str(frameNum), 'frame(s)')
+    print('exposure time =', str(exposureTime), 'ms')
 
     imageFile = imageFile.reshape((frameNum, rowNum, columnNum))
 
@@ -213,7 +218,7 @@ def importRawJPhys(path,
     channelLength = len(JPhysFile) / channelNum
 
     if len(JPhysFile) % channelNum != 0:
-        raise ArithmeticError, 'Length of the file should be divisible by channel number!'
+        raise ArithmeticError('Length of the file should be divisible by channel number!')
 
     header = {}
     body = {}
@@ -258,7 +263,7 @@ def importRawNewJPhys(path,
     #    print 'length of JPhys channel number:', channelNum
 
     if len(JPhysFile) % channelNum != 0:
-        raise ArithmeticError, 'Length of the file should be divisible by channel number!'
+        raise ArithmeticError('Length of the file should be divisible by channel number!')
 
     JPhysFile = JPhysFile.reshape([channelLength, channelNum])
 
@@ -294,7 +299,7 @@ def importRawJPhys2(path,
     channelLength = len(JPhysFile) / channelNum
 
     if channelLength % 1 != 0:
-        raise ArithmeticError, 'Bytes in each channel should be integer !'
+        raise ArithmeticError('Bytes in each channel should be integer !')
 
     channelLength = int(channelLength)
 
@@ -321,13 +326,13 @@ def importRawJPhys2(path,
             imageFrameTS.append(i * (1. / sf))
 
     if len(imageFrameTS) < imageFrameNum:
-        raise LookupError, "Expose period number is smaller than image frame number!"
+        raise LookupError("Expose period number is smaller than image frame number!")
     imageFrameTS = imageFrameTS[0:imageFrameNum]
 
     # first time of visual stimulation
     visualStart = None
 
-    for i in xrange(80, len(photodiode)):
+    for i in range(80, len(photodiode)):
         if ((photodiode[i] - photodiodeThr) * (photodiode[i - 1] - photodiodeThr)) < 0 and \
                         ((photodiode[i] - photodiodeThr) * (
                             photodiode[i - 75] - photodiodeThr)) < 0:  # first frame of big change
@@ -363,7 +368,7 @@ def importRawNewJPhys2(path,
     channelLength = len(JPhysFile) / channelNum
 
     if len(JPhysFile) % channelNum != 0:
-        raise ArithmeticError, 'Length of the file should be divisible by channel number!'
+        raise ArithmeticError('Length of the file should be divisible by channel number!')
 
     JPhysFile = JPhysFile.reshape([channelLength, channelNum])
 
@@ -388,13 +393,13 @@ def importRawNewJPhys2(path,
             imageFrameTS.append(i * (1. / sf))
 
     if len(imageFrameTS) < imageFrameNum:
-        raise LookupError, "Expose period number is smaller than image frame number!"
+        raise LookupError("Expose period number is smaller than image frame number!")
     imageFrameTS = imageFrameTS[0:imageFrameNum]
 
     # first time of visual stimulation
     visualStart = None
 
-    for i in xrange(80, len(photodiode)):
+    for i in range(80, len(photodiode)):
         if ((photodiode[i] - photodiodeThr) * (photodiode[i - 1] - photodiodeThr)) < 0 and \
                         ((photodiode[i] - photodiodeThr) * (
                             photodiode[i - 75] - photodiodeThr)) < 0:  # first frame of big change
@@ -441,7 +446,7 @@ def generateAVI(saveFolder,
         elif matrix.shape[3] == 4:
             r, g, b, a = np.rollaxis(matrix, axis=-1)
         else:
-            raise IndexError, 'The depth of matrix is not 3 or 4. Can not get RGB color!'
+            raise IndexError('The depth of matrix is not 3 or 4. Can not get RGB color!')
         r = r.reshape(r.shape[0], r.shape[1], r.shape[2], 1)
         g = g.reshape(g.shape[0], g.shape[1], g.shape[2], 1)
         b = b.reshape(b.shape[0], b.shape[1], b.shape[2], 1)
@@ -452,7 +457,7 @@ def generateAVI(saveFolder,
         s = s.reshape(s.shape[0], s.shape[1], s.shape[2], 1)
         newMatrix = np.concatenate((s, s, s), axis=3)
     else:
-        raise IndexError, 'The matrix dimension is neither 3 or 4. Can not get RGB color!'
+        raise IndexError('The matrix dimension is neither 3 or 4. Can not get RGB color!')
 
     fourcc = cv2.cv.CV_FOURCC(*encoder)
 
@@ -503,9 +508,9 @@ def importRawJCamF(path,
                 mov = mov[:, crop[0]:crop[1], crop[2]:crop[3]]
                 fileName = path.split('\\')[-1] + '_cropped.tif'
             except Exception as e:
-                print 'importRawJCamF: Can not understant the paramenter "crop":' + str(
-                    crop) + '\ncorp should be: [rowStart,rowEnd,colStart,colEnd]'
-                print '\nTrace back: \n' + e
+                print('importRawJCamF: Can not understant the paramenter "crop":' + str(crop) + \
+                      '\ncorp should be: [rowStart,rowEnd,colStart,colEnd]')
+                print('\nTrace back: \n' + e)
         else:
             fileName = path.split('\\')[-1] + '.tif'
 
@@ -526,7 +531,7 @@ def int2str(num, length=None):
     if length is None or length == len(rawstr):
         return rawstr
     elif length < len(rawstr):
-        raise ValueError, 'Length of the number is longer then defined display length!'
+        raise ValueError('Length of the number is longer then defined display length!')
     elif length > len(rawstr):
         return '0' * (length - len(rawstr)) + rawstr
 
@@ -592,10 +597,10 @@ def int2str(num, length=None):
 
 if __name__ == '__main__':
     # ----------------------------------------------------------------------------
-    print int2str(5)
-    print int2str(5, 2)
-    print int2str(155, 6)
+    print(int2str(5))
+    print(int2str(5, 2))
+    print(int2str(155, 6))
     # ----------------------------------------------------------------------------
 
 
-    print 'well done!'
+    print('well done!')

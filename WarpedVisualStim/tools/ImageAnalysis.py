@@ -5,13 +5,13 @@ import numpy as np
 from scipy import interpolate
 import scipy.ndimage as ni
 import skimage.morphology as sm
-import FileTools as ft
-import PlottingTools as pt
+from . import FileTools as ft
+from . import PlottingTools as pt
 
 try:
     import cv2
 except ImportError as e:
-    print e
+    print('can not import OpenCV. \n{}'.format(e))
 
 
 def resample(t1, y1, interval, kind='linear', isPlot=False):
@@ -178,13 +178,13 @@ def resize_image(img, outputShape, fillValue=0.):
     height = outputShape[0]
 
     if width < 1:
-        raise ValueError, 'width should be bigger than 0!!'
+        raise ValueError('width should be bigger than 0!!')
 
     if height < 1:
-        raise ValueError, 'height should be bigger than 0!!'
+        raise ValueError('height should be bigger than 0!!')
 
     if len(img.shape) != 2 and len(img.shape) != 3:
-        raise ValueError, 'input image should be a 2-d or 3-d array!!'
+        raise ValueError('input image should be a 2-d or 3-d array!!')
 
     if len(img.shape) == 2:  # 2-d image
         startWidth = img.shape[-1]
@@ -232,7 +232,7 @@ def resize_image(img, outputShape, fillValue=0.):
 
 def expand_image_cv2(img):
     if len(img.shape) != 2:
-        raise ValueError, 'Input image should be 2d!'
+        raise ValueError('Input image should be 2d!')
 
     dtype = img.dtype
     img = img.astype(np.float32)
@@ -265,7 +265,7 @@ def expand_image(img):
         newImg = np.concatenate((left, tall, right), axis=2)
         return newImg
     else:
-        raise ValueError, 'Input image should be 2d or 3d!'
+        raise ValueError('Input image should be 2d or 3d!')
 
 
 def zoom_image(img, zoom, interpolation='cubic'):  # 'cubic','linear','area','nearest','lanczos4'
@@ -276,18 +276,23 @@ def zoom_image(img, zoom, interpolation='cubic'):  # 'cubic','linear','area','ne
     zoom[1]: width
     """
     if len(img.shape) != 2:
-        raise ValueError, 'Input image should be 2d!'
+        raise ValueError('Input image should be 2d!')
 
     try:
         zoomH = float(zoom[0]); zoomW = float(zoom[1])
     except TypeError:
         zoomH = float(zoom); zoomW = float(zoom)
 
-    if interpolation == 'cubic': interpo = cv2.INTER_CUBIC
-    if interpolation == 'linear': interpo = cv2.INTER_LINEAR
-    if interpolation == 'area': interpo = cv2.INTER_AREA
-    if interpolation == 'nearest': interpo = cv2.INTER_NEAREST
-    if interpolation == 'lanczos4': interpo = cv2.INTER_LANCZOS4
+    if interpolation == 'cubic':
+        interpo = cv2.INTER_CUBIC
+    if interpolation == 'linear':
+        interpo = cv2.INTER_LINEAR
+    if interpolation == 'area':
+        interpo = cv2.INTER_AREA
+    if interpolation == 'nearest':
+        interpo = cv2.INTER_NEAREST
+    if interpolation == 'lanczos4':
+        interpo = cv2.INTER_LANCZOS4
 
     newImg = cv2.resize(img.astype(np.float), dsize=(int(img.shape[1] * zoomW), int(img.shape[0] * zoomH)),
                         interpolation=interpo)
@@ -303,7 +308,7 @@ def moveImage(img, Xoffset, Yoffset, width, height, borderValue=0.0):
     empty pixels will be filled with zeros
     """
     if len(img.shape) != 2:
-        raise ValueError, 'Input image should be 2d!'
+        raise ValueError('Input image should be 2d!')
 
     M = np.float32([[1, 0, Xoffset], [0, 1, Yoffset]])
 
@@ -321,7 +326,7 @@ def rotate_image(img, angle, borderValue=0.0):
     """
 
     if len(img.shape) != 2:
-        raise ValueError, 'Input image should be 2d!'
+        raise ValueError('Input image should be 2d!')
 
     rows, cols = img.shape
 
@@ -344,7 +349,7 @@ def rigid_transform(img, zoom=None, rotation=None, offset=None, outputShape=None
     """
 
     if len(img.shape) != 2 and len(img.shape) != 3:
-        raise LookupError, 'Input image is not a 2d or 3d array!'
+        raise LookupError('Input image is not a 2d or 3d array!')
 
     newImg = img.astype(np.float32)
 
@@ -386,7 +391,7 @@ def rigid_transform_cv2_2d(img, zoom=None, rotation=None, offset=None, outputSha
     """
 
     if len(img.shape) != 2:
-        raise LookupError, 'Input image is not a 2d or 3d array!'
+        raise LookupError('Input image is not a 2d or 3d array!')
 
     newImg = np.array(img).astype(np.float)
     minValue = np.amin(newImg)
@@ -412,7 +417,7 @@ def rigid_transform_cv2_2d(img, zoom=None, rotation=None, offset=None, outputSha
 
 def rigid_transform_cv2_3d(img, zoom=None, rotation=None, offset=None, outputShape=None):
     if len(img.shape) != 3:
-        raise LookupError, 'Input image is not a 3d array!'
+        raise LookupError('Input image is not a 3d array!')
 
     if not outputShape:
         if zoom:
@@ -449,7 +454,7 @@ def rigid_transform_cv2(img, zoom=None, rotation=None, offset=None, outputShape=
     elif len(img.shape) == 3:
         return rigid_transform_cv2_3d(img, zoom=zoom, rotation=rotation, offset=offset, outputShape=outputShape)
     else:
-        raise ValueError, 'Input image is not a 2d or 3d array!'
+        raise ValueError('Input image is not a 2d or 3d array!')
 
 
 def boxcartime_dff(data,
@@ -467,7 +472,7 @@ def boxcartime_dff(data,
     import scipy.signal as sig
 
     if data.ndim != 3:
-        raise LookupError, 'input images must be a 3-dim array format [t,y,x]'
+        raise LookupError('input images must be a 3-dim array format [t,y,x]')
 
     exposure = np.float(fs / 1000)  # convert exposure from ms to s
     win = np.float(window)
@@ -506,7 +511,7 @@ def normalize_movie(movie,
     if baselinePic is not None:
 
         if movie.shape[1:] != baselinePic.shape:
-            raise LookupError, 'The shape of "baselinePic" should match the shape of the frame shape of "movie"!'
+            raise LookupError('The shape of "baselinePic" should match the shape of the frame shape of "movie"!')
 
         averageImage = baselinePic
 
@@ -517,7 +522,7 @@ def normalize_movie(movie,
         averageImage = np.median(movie, axis=0)
 
     else:
-        raise LookupError, 'The "baselineType" should be "mean" or "median"!!'
+        raise LookupError('The "baselineType" should be "mean" or "median"!!')
 
     normalizedMovie = np.subtract(movie, averageImage)
     dFoverFMovie = np.divide(normalizedMovie, averageImage)
@@ -532,7 +537,7 @@ def temporal_filter_movie(mov,  # array of movie
                           mode='box'):  # filter mode, '1/f' or 'box'):
 
     if len(mov.shape) != 3:
-        raise LookupError, 'The "mov" array should have 3 dimensions!'
+        raise LookupError('The "mov" array should have 3 dimensions!')
 
     frameNum = mov.shape[0]
     freqs = np.fft.fftfreq(frameNum, d=(1. / float(Fs)))
@@ -551,7 +556,7 @@ def temporal_filter_movie(mov,  # array of movie
     elif mode == 'box':
         filterArray[0] = 0
     else:
-        raise NameError, 'Variable "mode" should be either "1/f" or "box"!'
+        raise NameError('Variable "mode" should be either "1/f" or "box"!')
 
     if Flow == 0:
         filterArray[0] = 1
@@ -568,7 +573,8 @@ def temporal_filter_movie(mov,  # array of movie
 
 
 def generate_rectangle_mask(shape, center, width, height, isplot=False):
-    if len(shape) != 2: raise LookupError, 'Shape should be two dimensional.'
+    if len(shape) != 2:
+        raise LookupError('Shape should be two dimensional.')
 
     mask = np.zeros(shape);
     mask[:] = np.nan
@@ -576,7 +582,7 @@ def generate_rectangle_mask(shape, center, width, height, isplot=False):
     int(round(center[1] - width / 2)):int(round(center[1] + width / 2))] = 1
 
     if np.isnan(np.nansum(mask[:])):
-        raise ArithmeticError, 'No element in mask!'
+        raise ArithmeticError('No element in mask!')
 
     if isplot == True:
         f = plt.figure();
@@ -587,7 +593,8 @@ def generate_rectangle_mask(shape, center, width, height, isplot=False):
 
 
 def generate_oval_mask(shape, center, width, height, isplot=False):
-    if len(shape) != 2: raise LookupError, 'Shape should be two dimensional.'
+    if len(shape) != 2:
+        raise LookupError('Shape should be two dimensional.')
 
     mask = np.zeros(shape);
     mask[:] = np.nan
@@ -601,7 +608,7 @@ def generate_oval_mask(shape, center, width, height, isplot=False):
                 mask[i, j] = 1
 
     if np.isnan(np.nansum(mask[:])):
-        raise ArithmeticError, 'No element in mask!'
+        raise ArithmeticError('No element in mask!')
 
     if isplot == True:
         f = plt.figure();
@@ -623,20 +630,20 @@ def get_trace(movie, mask, maskMode='binary'):
 
     if maskMode == 'binary':
         if np.where(mask == 0)[0].size + np.where(mask == 1)[0].size < mask.size:
-            raise ValueError, 'Binary mask should only contain zeros and ones!!'
+            raise ValueError('Binary mask should only contain zeros and ones!!')
         else:
             finalMask = np.array(mask.astype(np.float))
             pixelNum = np.sum(finalMask.flatten())
     elif maskMode == 'binaryNan':
         if np.sum(np.isnan(mask).flatten()) + np.where(mask == 1)[0].size < mask.size:
-            raise ValueError, 'BinaryNan mask should only contain nans and ones!!'
+            raise ValueError('BinaryNan mask should only contain nans and ones!!')
         else:
             finalMask = np.ones(mask.shape, dtype=np.float)
             finalMask[np.isnan(mask)] = 0
             pixelNum = mask.size - np.sum(np.isnan(mask).flatten())
     elif maskMode == 'weighted':
         if np.isnan(mask).any():
-            raise ValueError, 'Weighted mask should not contain nan(s)!!'
+            raise ValueError('Weighted mask should not contain nan(s)!!')
         else:
             finalMask = np.array(mask.astype(np.float))
             pixelNum = mask.size - np.where(mask == 0)[0].size
@@ -645,183 +652,189 @@ def get_trace(movie, mask, maskMode='binary'):
         finalMask[np.isnan(mask)] = 0
         pixelNum = mask.size - np.where(finalMask == 0)[0].size
     else:
-        raise LookupError, 'maskMode not understood. Should be one of "binary", "binaryNan", "weighted", "weightedNan".'
+        raise LookupError('maskMode not understood. Should be one of "binary", '
+                          '"binaryNan", "weighted", "weightedNan".')
 
     trace = np.sum(np.multiply(movie, finalMask), (1, 2)) / pixelNum
 
     return trace
 
 
-def get_trace_binaryslicer(bl_obj, mask, mask_mode='binary'):
-    """
-
-    :param bl_obj: the binary slicer object of a large matrix
-    :param mask: the mask
-    :param mask_mode: same as 'mask_mode' in function get_trace
-
-    maskMode: 'binary': ones in roi, zeros outside
-              'binaryNan': ones in roi, nans outside
-              'weighted': weighted values in roi, zeros outside (note: all pixels equal to zero will be considered outside roi
-              'weightedNan': weighted values in roi, nans outside
-
-    :return: extracted trace
-    """
-
-    if len(bl_obj.shape) != 3: raise ValueError, 'BinarySlicer object should be 3d!'
-    if len(mask.shape) != 2: raise ValueError, 'Mask should be 2d!'
-    if bl_obj.shape[1] != mask.shape[0] or bl_obj.shape[2] != mask.shape[1]:
-        raise ValueError, 'the size of each frame of the BinarySlicer object should be the same as the size of mask'
-
-    if mask_mode == 'binary':
-        if np.where(mask == 0)[0].size + np.where(mask == 1)[0].size < mask.size:
-            raise ValueError, 'Binary mask should only contain zeros and ones!!'
-        else:
-            mask_ind = np.where(mask != 0)
-            # print mask_ind
-            min_row = min(mask_ind[0]);
-            max_row = max(mask_ind[0]) + 1
-            min_col = min(mask_ind[1]);
-            max_col = max(mask_ind[1]) + 1
-            finalMask = np.array(mask.astype(np.float))[min_row:max_row, min_col:max_col]
-    elif mask_mode == 'binaryNan':
-        if np.sum(np.isnan(mask).flatten()) + np.where(mask == 1)[0].size < mask.size:
-            raise ValueError, 'BinaryNan mask should only contain nans and ones!!'
-        else:
-            mask_ind = np.where(mask != np.nan)
-            min_row = min(mask_ind[0]);
-            max_row = max(mask_ind[0]) + 1
-            min_col = min(mask_ind[1]);
-            max_col = max(mask_ind[1]) + 1
-            finalMask = np.ones(mask.shape, dtype=np.float)
-            finalMask[np.isnan(mask)] = 0
-            finalMask = finalMask[min_row:max_row, min_col:max_col]
-    elif mask_mode == 'weighted':
-        if np.isnan(mask).any():
-            raise ValueError, 'Weighted mask should not contain nan(s)!!'
-        else:
-            mask_ind = np.where(mask != 0)
-            min_row = min(mask_ind[0]);
-            max_row = max(mask_ind[0]) + 1
-            min_col = min(mask_ind[1]);
-            max_col = max(mask_ind[1]) + 1
-            finalMask = np.array(mask.astype(np.float))[min_row:max_row, min_col:max_col]
-    elif mask_mode == 'weightedNan':
-        finalMask = np.array(mask.astype(np.float))
-        finalMask[np.isnan(mask)] = 0
-        mask_ind = np.where(finalMask != 0)
-        min_row = min(mask_ind[0]);
-        max_row = max(mask_ind[0]) + 1
-        min_col = min(mask_ind[1]);
-        max_col = max(mask_ind[1]) + 1
-        finalMask = finalMask[min_row:max_row, min_col:max_col]
-
-    mov = bl_obj[:, min_row:max_row, min_col:max_col]
-    # print mov
-    return get_trace(mov, finalMask, maskMode='weighted')
-
-
-def get_trace_binaryslicer2(bl_obj, mask, mask_mode='binary', loading_frame_num=1000):
-    """
-
-    get trace for a given mask from a BinarySlicer object, by loading chunk each time
-
-    :param bl_obj: the binary slicer object of a large matrix
-    :param mask: the mask
-    :param mask_mode: same as 'mask_mode' in function get_trace
-    :param loading_frame_num: frame number of each chunk
-
-    maskMode: 'binary': ones in roi, zeros outside
-              'binaryNan': ones in roi, nans outside
-              'weighted': weighted values in roi, zeros outside (note: all pixels equal to zero will be considered outside roi
-              'weightedNan': weighted values in roi, nans outside
-
-    :return: extracted trace
-    """
-
-    if loading_frame_num <= 1: raise ValueError, 'loading_frame_num should be a integer larger than 1!'
-    if len(bl_obj.shape) != 3: raise ValueError, 'BinarySlicer object should be 3d!'
-    if len(mask.shape) != 2: raise ValueError, 'Mask should be 2d!'
-    if bl_obj.shape[1] != mask.shape[0] or bl_obj.shape[2] != mask.shape[1]:
-        raise ValueError, 'the size of each frame of the BinarySlicer object should be the same as the size of mask'
-
-    frameNum = bl_obj.shape[0]
-
-    print '\nInput movie shape:', bl_obj.shape
-
-    chunkNum = frameNum // loading_frame_num
-    if frameNum % loading_frame_num == 0:
-        print 'Translating in chunks: ' + str(chunkNum) + ' x ' + str(loading_frame_num) + ' frame(s)'
-    else:
-        chunkNum += 1
-        print 'Translating in chunks: ' + str(chunkNum - 1) + ' x ' + str(
-            loading_frame_num) + ' frame(s)' + ' + ' + str(frameNum % loading_frame_num) + ' frame(s)'
-
-    traces = []
-    for i in range(chunkNum):
-        indStart = i * loading_frame_num
-        indEnd = (i + 1) * loading_frame_num
-        if indEnd > frameNum: indEnd = frameNum
-        print 'Extracting signal from frame ' + str(indStart) + ' to frame ' + str(indEnd) + '.\t' + str(
-            i * 100. / chunkNum) + '%'
-        currMov = bl_obj[indStart:indEnd, :, :]
-        traces.append(get_trace(currMov, mask, maskMode=mask_mode))
-
-    return np.concatenate(traces)
-
-
-def get_trace_binaryslicer3(bl_obj, masks, mask_mode='binary', loading_frame_num=1000):
-    """
-
-    get trace for a given mask from a BinarySlicer object, by loading chunk each time
-
-    :param bl_obj: the binary slicer object of a large matrix
-    :param masks: a dictionary of masks
-    :param mask_mode: same as 'mask_mode' in function get_trace
-    :param loading_frame_num: frame number of each chunk
-
-    maskMode: 'binary': ones in roi, zeros outside
-              'binaryNan': ones in roi, nans outside
-              'weighted': weighted values in roi, zeros outside (note: all pixels equal to zero will be considered outside roi
-              'weightedNan': weighted values in roi, nans outside
-
-    :return: extracted trace
-    """
-
-    if loading_frame_num <= 1: raise ValueError, 'loading_frame_num should be a integer larger than 1!'
-    if len(bl_obj.shape) != 3: raise ValueError, 'BinarySlicer object should be 3d!'
-
-    frameNum = bl_obj.shape[0]
-
-    print '\nInput movie shape:', bl_obj.shape
-
-    chunkNum = frameNum // loading_frame_num
-    if frameNum % loading_frame_num == 0:
-        print 'Translating in chunks: ' + str(chunkNum) + ' x ' + str(loading_frame_num) + ' frame(s)'
-    else:
-        chunkNum += 1
-        print 'Translating in chunks: ' + str(chunkNum - 1) + ' x ' + str(
-            loading_frame_num) + ' frame(s)' + ' + ' + str(frameNum % loading_frame_num) + ' frame(s)'
-
-    traces = {}
-    for key in masks.iterkeys(): traces.update({'trace_' + key: []})
-
-    for i in range(chunkNum):
-        indStart = i * loading_frame_num
-        indEnd = (i + 1) * loading_frame_num
-        if indEnd > frameNum: indEnd = frameNum
-        print 'Extracting signal from frame ' + str(indStart) + ' to frame ' + str(indEnd) + '.\t' + str(
-            i * 100. / chunkNum) + '%'
-        currMov = bl_obj[indStart:indEnd, :, :]
-        for key, mask in masks.iteritems():
-            if len(mask.shape) != 2: raise ValueError, 'Mask "' + key + '" should be 2d!'
-            if bl_obj.shape[1] != mask.shape[0] or bl_obj.shape[2] != mask.shape[1]:
-                raise ValueError, 'the size of each frame of the BinarySlicer object should be the same as the size of mask "' + key + '"!'
-            traces['trace_' + key].append(get_trace(currMov, mask, maskMode=mask_mode))
-
-    for key in traces.iterkeys():
-        traces[key] = np.concatenate(traces[key])
-
-    return traces
+# def get_trace_binaryslicer(bl_obj, mask, mask_mode='binary'):
+#     """
+#
+#     :param bl_obj: the binary slicer object of a large matrix
+#     :param mask: the mask
+#     :param mask_mode: same as 'mask_mode' in function get_trace
+#
+#     maskMode: 'binary': ones in roi, zeros outside
+#               'binaryNan': ones in roi, nans outside
+#               'weighted': weighted values in roi, zeros outside (note: all pixels equal to zero will be considered outside roi
+#               'weightedNan': weighted values in roi, nans outside
+#
+#     :return: extracted trace
+#     """
+#
+#     if len(bl_obj.shape) != 3:
+#         raise ValueError('BinarySlicer object should be 3d!')
+#     if len(mask.shape) != 2:
+#         raise ValueError('Mask should be 2d!')
+#     if bl_obj.shape[1] != mask.shape[0] or bl_obj.shape[2] != mask.shape[1]:
+#         raise ValueError('the size of each frame of the BinarySlicer object should be the same as the size of mask')
+#
+#     if mask_mode == 'binary':
+#         if np.where(mask == 0)[0].size + np.where(mask == 1)[0].size < mask.size:
+#             raise ValueError('Binary mask should only contain zeros and ones!!')
+#         else:
+#             mask_ind = np.where(mask != 0)
+#             # print mask_ind
+#             min_row = min(mask_ind[0]);
+#             max_row = max(mask_ind[0]) + 1
+#             min_col = min(mask_ind[1]);
+#             max_col = max(mask_ind[1]) + 1
+#             finalMask = np.array(mask.astype(np.float))[min_row:max_row, min_col:max_col]
+#     elif mask_mode == 'binaryNan':
+#         if np.sum(np.isnan(mask).flatten()) + np.where(mask == 1)[0].size < mask.size:
+#             raise ValueError('BinaryNan mask should only contain nans and ones!!')
+#         else:
+#             mask_ind = np.where(mask != np.nan)
+#             min_row = min(mask_ind[0]);
+#             max_row = max(mask_ind[0]) + 1
+#             min_col = min(mask_ind[1]);
+#             max_col = max(mask_ind[1]) + 1
+#             finalMask = np.ones(mask.shape, dtype=np.float)
+#             finalMask[np.isnan(mask)] = 0
+#             finalMask = finalMask[min_row:max_row, min_col:max_col]
+#     elif mask_mode == 'weighted':
+#         if np.isnan(mask).any():
+#             raise ValueError('Weighted mask should not contain nan(s)!!')
+#         else:
+#             mask_ind = np.where(mask != 0)
+#             min_row = min(mask_ind[0]);
+#             max_row = max(mask_ind[0]) + 1
+#             min_col = min(mask_ind[1]);
+#             max_col = max(mask_ind[1]) + 1
+#             finalMask = np.array(mask.astype(np.float))[min_row:max_row, min_col:max_col]
+#     elif mask_mode == 'weightedNan':
+#         finalMask = np.array(mask.astype(np.float))
+#         finalMask[np.isnan(mask)] = 0
+#         mask_ind = np.where(finalMask != 0)
+#         min_row = min(mask_ind[0]);
+#         max_row = max(mask_ind[0]) + 1
+#         min_col = min(mask_ind[1]);
+#         max_col = max(mask_ind[1]) + 1
+#         finalMask = finalMask[min_row:max_row, min_col:max_col]
+#
+#     mov = bl_obj[:, min_row:max_row, min_col:max_col]
+#     # print mov
+#     return get_trace(mov, finalMask, maskMode='weighted')
+#
+#
+# def get_trace_binaryslicer2(bl_obj, mask, mask_mode='binary', loading_frame_num=1000):
+#     """
+#
+#     get trace for a given mask from a BinarySlicer object, by loading chunk each time
+#
+#     :param bl_obj: the binary slicer object of a large matrix
+#     :param mask: the mask
+#     :param mask_mode: same as 'mask_mode' in function get_trace
+#     :param loading_frame_num: frame number of each chunk
+#
+#     maskMode: 'binary': ones in roi, zeros outside
+#               'binaryNan': ones in roi, nans outside
+#               'weighted': weighted values in roi, zeros outside (note: all pixels equal to zero will be considered outside roi
+#               'weightedNan': weighted values in roi, nans outside
+#
+#     :return: extracted trace
+#     """
+#
+#     if loading_frame_num <= 1:
+#         raise ValueError('loading_frame_num should be a integer larger than 1!')
+#     if len(bl_obj.shape) != 3:
+#         raise ValueError('BinarySlicer object should be 3d!')
+#     if len(mask.shape) != 2:
+#         raise ValueError('Mask should be 2d!')
+#     if bl_obj.shape[1] != mask.shape[0] or bl_obj.shape[2] != mask.shape[1]:
+#         raise ValueError('the size of each frame of the BinarySlicer object should be the same as the size of mask')
+#
+#     frameNum = bl_obj.shape[0]
+#
+#     print('\nInput movie shape:', bl_obj.shape)
+#
+#     chunkNum = frameNum // loading_frame_num
+#     if frameNum % loading_frame_num == 0:
+#         print ('Translating in chunks: ' + str(chunkNum) + ' x ' + str(loading_frame_num) + ' frame(s)')
+#     else:
+#         chunkNum += 1
+#         print('Translating in chunks: ' + str(chunkNum - 1) + ' x ' + str(loading_frame_num) +
+#               ' frame(s)' + ' + ' + str(frameNum % loading_frame_num) + ' frame(s)')
+#
+#     traces = []
+#     for i in range(chunkNum):
+#         indStart = i * loading_frame_num
+#         indEnd = (i + 1) * loading_frame_num
+#         if indEnd > frameNum: indEnd = frameNum
+#         print('Extracting signal from frame ' + str(indStart) + ' to frame ' + str(indEnd) +
+#               '.\t' + str(i * 100. / chunkNum) + '%')
+#         currMov = bl_obj[indStart:indEnd, :, :]
+#         traces.append(get_trace(currMov, mask, maskMode=mask_mode))
+#
+#     return np.concatenate(traces)
+#
+#
+# def get_trace_binaryslicer3(bl_obj, masks, mask_mode='binary', loading_frame_num=1000):
+#     """
+#
+#     get trace for a given mask from a BinarySlicer object, by loading chunk each time
+#
+#     :param bl_obj: the binary slicer object of a large matrix
+#     :param masks: a dictionary of masks
+#     :param mask_mode: same as 'mask_mode' in function get_trace
+#     :param loading_frame_num: frame number of each chunk
+#
+#     maskMode: 'binary': ones in roi, zeros outside
+#               'binaryNan': ones in roi, nans outside
+#               'weighted': weighted values in roi, zeros outside (note: all pixels equal to zero will be considered outside roi
+#               'weightedNan': weighted values in roi, nans outside
+#
+#     :return: extracted trace
+#     """
+#
+#     if loading_frame_num <= 1: raise ValueError, 'loading_frame_num should be a integer larger than 1!'
+#     if len(bl_obj.shape) != 3: raise ValueError, 'BinarySlicer object should be 3d!'
+#
+#     frameNum = bl_obj.shape[0]
+#
+#     print '\nInput movie shape:', bl_obj.shape
+#
+#     chunkNum = frameNum // loading_frame_num
+#     if frameNum % loading_frame_num == 0:
+#         print 'Translating in chunks: ' + str(chunkNum) + ' x ' + str(loading_frame_num) + ' frame(s)'
+#     else:
+#         chunkNum += 1
+#         print 'Translating in chunks: ' + str(chunkNum - 1) + ' x ' + str(
+#             loading_frame_num) + ' frame(s)' + ' + ' + str(frameNum % loading_frame_num) + ' frame(s)'
+#
+#     traces = {}
+#     for key in masks.iterkeys(): traces.update({'trace_' + key: []})
+#
+#     for i in range(chunkNum):
+#         indStart = i * loading_frame_num
+#         indEnd = (i + 1) * loading_frame_num
+#         if indEnd > frameNum: indEnd = frameNum
+#         print 'Extracting signal from frame ' + str(indStart) + ' to frame ' + str(indEnd) + '.\t' + str(
+#             i * 100. / chunkNum) + '%'
+#         currMov = bl_obj[indStart:indEnd, :, :]
+#         for key, mask in masks.iteritems():
+#             if len(mask.shape) != 2: raise ValueError, 'Mask "' + key + '" should be 2d!'
+#             if bl_obj.shape[1] != mask.shape[0] or bl_obj.shape[2] != mask.shape[1]:
+#                 raise ValueError, 'the size of each frame of the BinarySlicer object should be the same as the size of mask "' + key + '"!'
+#             traces['trace_' + key].append(get_trace(currMov, mask, maskMode=mask_mode))
+#
+#     for key in traces.iterkeys():
+#         traces[key] = np.concatenate(traces[key])
+#
+#     return traces
 
 
 def hit_or_miss(coor, mask):
@@ -850,10 +863,10 @@ def harmonic_amplitude(f,  # function value
     """
 
     if (type(period) != int) | (period <= 0):
-        raise ArithmeticError, '"period" should be a positive integer!'
+        raise ArithmeticError('"period" should be a positive integer!')
 
     if (type(n) != int) | (n < 0):
-        raise ArithmeticError, '"n" should be a non-negative positive integer!'
+        raise ArithmeticError('"n" should be a non-negative positive integer!')
 
     L = len(f)
     x = np.arange(L)
@@ -887,7 +900,7 @@ def discretize(array, binSize):
     newArray = np.zeros(flatArray.shape)
     newArray[:] = np.nan
 
-    for i in xrange(len(indArray)):
+    for i in range(len(indArray)):
         if np.isnan(flatArray[i]) == False:
             newArray[i] = bins[indArray[i]]
 
@@ -929,7 +942,7 @@ def is_adjacent(array1, array2, borderWidth=2):
         return False
 
 
-def remove_small_patches(mask, areaThr=100, structure=[[1, 1, 1], [1, 1, 1], [1, 1, 1]]):
+def remove_small_patches(mask, areaThr=100, structure=([1, 1, 1], [1, 1, 1], [1, 1, 1])):
     """
     remove small isolated patches
     """
@@ -937,9 +950,10 @@ def remove_small_patches(mask, areaThr=100, structure=[[1, 1, 1], [1, 1, 1], [1,
     if mask.dtype == np.bool:
         pass
     elif issubclass(mask.dtype.type, np.integer):
-        if np.amin(mask) < 0 or np.amax(mask) > 1: raise ValueError, 'Values of input image should be either 0 or 1.'
+        if np.amin(mask) < 0 or np.amax(mask) > 1:
+            raise ValueError('Values of input image should be either 0 or 1.')
     else:
-        raise TypeError, 'Data type of input image should be either np.bool or integer.'
+        raise TypeError('Data type of input image should be either np.bool or integer.')
 
     patches, n = ni.label(mask, structure)
     newMask = np.zeros(mask.shape, dtype=np.uint8)
@@ -1059,18 +1073,18 @@ def z_downsample(img, downSampleRate):
     """
 
     if len(img.shape) != 3:
-        raise ValueError, 'Input array shoud be 3D!'
+        raise ValueError('Input array shoud be 3D!')
 
     newFrameNum = (img.shape[0] - (img.shape[0] % downSampleRate)) / downSampleRate
     newImg = np.empty((newFrameNum, img.shape[1], img.shape[2]), dtype=img.dtype)
 
-    print 'Start downsampling...'
+    print('Start downsampling...')
     for i in range(newFrameNum):
         #            print (float(i)*100/newFrameNum),'%'
         currChunk = img[i * downSampleRate:(i + 1) * downSampleRate, :, :].astype(np.float)
         currFrame = np.mean(currChunk, axis=0)
         newImg[i, :, :] = currFrame.astype(img.dtype)
-    print 'End of downsampling.'
+    print('End of downsampling.')
     return newImg
 
 
@@ -1113,7 +1127,7 @@ def get_marked_masks(labeled, markCoor):
     """
 
     masks = get_masks(labeled)
-    for key, value in masks.iteritems():
+    for key, value in masks.items():
         if hit_or_miss(markCoor, value): return value
     return None
 
@@ -1125,7 +1139,7 @@ def sort_masks(masks, keyPrefix='', labelLength=3):
 
     maskNum = len(masks.keys())
     order = []
-    for key, mask in masks.iteritems():
+    for key, mask in masks.items():
         order.append([key, np.sum(mask.flatten())])
 
     order = sorted(order, key=lambda a: a[1], reverse=True)
@@ -1145,7 +1159,8 @@ def temp_downsample(A, rate, verbose=False):
     down sample a 3-d array in 0 direction
     """
 
-    if len(A.shape) != 3: raise ValueError, 'input array should be 3-d.'
+    if len(A.shape) != 3:
+        raise ValueError('input array should be 3-d.')
     rate = int(rate)
     dataType = A.dtype
     newZDepth = (A.shape[0] - (A.shape[0] % rate)) / rate
@@ -1182,17 +1197,17 @@ def get_average_movie(mov, frameTS, onsetTimes, chunkDur):
 
     for onset in onsetTimes:
         onsetFrameInd = np.argmin(np.abs(frameTS - onset))
-        print 'Chunk:', int(
-            n), '; Starting frame index:', onsetFrameInd, '; Ending frame index', onsetFrameInd + chunkFrameDur
+        print('Chunk:', int(n), '; Starting frame index:', onsetFrameInd,
+              '; Ending frame index', onsetFrameInd + chunkFrameDur)
 
         if onsetFrameInd + chunkFrameDur <= mov.shape[0]:
             if sumMov is None: sumMov = np.zeros((chunkFrameDur, mov.shape[1], mov.shape[2]))
             sumMov += mov[onsetFrameInd:onsetFrameInd + chunkFrameDur, :, :].astype(np.float32)
             n += 1.
         else:
-            print 'Ending frame index (' + int(
-                onsetFrameInd + chunkFrameDur) + ') is larger than frames in movie (' + int(
-                mov.shape[0]) + '.\nExclude this trigger.'
+            print('Ending frame index (' + int(onsetFrameInd + chunkFrameDur) +
+                  ') is larger than frames in movie (' + int(mov.shape[0]) +
+                  '.\nExclude this trigger.')
             continue
 
     return sumMov.astype(np.float32) / n
@@ -1211,7 +1226,8 @@ class ROI(object):
         :param pixelSizeUnit: str, the unit of pixel size
         """
 
-        if len(mask.shape) != 2: raise ValueError, 'Input mask should be 2d.'
+        if len(mask.shape) != 2:
+            raise ValueError('Input mask should be 2d.')
 
         self.dimension = mask.shape
         self.pixels = np.where(np.logical_and(mask != 0, ~np.isnan(mask)))
@@ -1223,7 +1239,7 @@ class ROI(object):
         elif len(pixelSize) == 2:
             self.pixelSizeY = pixelSize[0]; self.pixelSizeX = pixelSize[1]
         else:
-            raise LookupError, 'pixel size should be either None or scalar or list(array) of two sclars!!'
+            raise LookupError('pixel size should be either None or scalar or list(array) of two sclars!!')
 
         if pixelSize is None:
             self.pixelSizeUnit = None
@@ -1259,10 +1275,10 @@ class ROI(object):
         """
 
         if (self.pixelSizeX is not None) and (self.pixelSizeX is not None):
-            print 'returning area with unit:' + self.pixelSizeUnit + '^2'
+            print('returning area with unit:' + self.pixelSizeUnit + '^2')
             return float(len(self.pixels[0])) * self.pixelSizeX * self.pixelSizeY
         else:
-            print 'returning area as pixel counts without unit.'
+            print('returning area as pixel counts without unit.')
             return len(self.pixels[0])
 
     def get_center(self):
@@ -1410,4 +1426,4 @@ class WeightedROI(ROI):
 
 
 if __name__ == '__main__':
-    print 'for debug'
+    print('for debug')
