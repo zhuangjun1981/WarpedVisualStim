@@ -5,8 +5,8 @@ saved in the log pkl files.
 '''
 
 import numpy as np
-import tools.FileTools as ft
-import tools.GenericTools as gt
+from .tools import FileTools as ft
+from .tools import GenericTools as gt
 
 class DisplayLogAnalyzer(object):
     """

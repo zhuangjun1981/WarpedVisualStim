@@ -13,13 +13,9 @@ import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 import time
-from tools import FileTools as ft
-from tools.IO import nidaq as iodaq
-
-try:
-    import skimage.external.tifffile as tf
-except ImportError:
-    import tifffile as tf
+from .tools import FileTools as ft
+from .tools.IO import nidaq as iodaq
+import tifffile as tf
 
 
 def analyze_frames(ts_start, ts_end, refresh_rate, check_point=(0.02, 0.033, 0.05, 0.1)):

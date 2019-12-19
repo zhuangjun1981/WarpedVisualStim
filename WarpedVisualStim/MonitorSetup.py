@@ -6,7 +6,7 @@ Notes
 """
 import numpy as np
 import matplotlib.pyplot as plt
-import retinotopic_mapping.tools.ImageAnalysis as ia
+from .tools import ImageAnalysis as ia
 
 
 class Monitor(object):
