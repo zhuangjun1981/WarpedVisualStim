@@ -1,6 +1,6 @@
 import os
 import unittest
-import retinotopic_mapping.DisplayStimulus as ds
+from .. import DisplayStimulus as ds
 
 curr_folder = os.path.dirname(os.path.realpath(__file__))
 os.chdir(curr_folder)

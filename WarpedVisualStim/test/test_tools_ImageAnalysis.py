@@ -1,6 +1,6 @@
 import os
 import unittest
-import retinotopic_mapping.tools.ImageAnalysis as ia
+from ..tools import ImageAnalysis as ia
 
 curr_folder = os.path.dirname(os.path.realpath(__file__))
 os.chdir(curr_folder)

@@ -1,6 +1,6 @@
 import os
 import unittest
-import retinotopic_mapping.StimulusRoutines as sr
+from .. import StimulusRoutines as sr
 
 class TestSimulation(unittest.TestCase):
 
