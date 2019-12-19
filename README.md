@@ -34,13 +34,13 @@ We are planning on occasional updating this tool with no fixed schedule. Communi
 
 #### Language:
 
-1. python 3.8
+1. python 3.7
 
 
 #### Install:
 ```
 cd <package_path>
-conda env create --name warpedvisualstim python=3
+conda env create --name warpedvisualstim python=3.7
 activate warpedvisualstim (Windows)
 source activate warpedvisualstim (Mac or Linux)
 python setup.py install

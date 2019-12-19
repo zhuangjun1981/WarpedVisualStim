@@ -22,9 +22,9 @@ http://zone.ni.com/reference/en-XX/help/370471W-01/
 
 import logging
 
-import PyDAQmx
+# import PyDAQmx
 from PyDAQmx import Task
-from PyDAQmx.DAQmxConstants import *
+# from PyDAQmx.DAQmxConstants import *
 import PyDAQmx.DAQmxFunctions as DAQmxFunctions
 from PyDAQmx.DAQmxFunctions import function_dict, function_list
 from numpy import zeros, sin, arange, pi, array, ones
@@ -71,8 +71,8 @@ class System(object):
     Added convenience methods as well for pythonicness.
 
     Examples:
-        >>> s = System()
-        >>> s.getDevNames()
+        > s = System()
+        > s.getDevNames()
         ['Dev1', 'Dev2']
 
     """
@@ -161,8 +161,8 @@ class Device(object):
         device_name (str): The device name Ex: "Dev1"
 
     Example:
-        >>> d = Device('Dev1')
-        >>> d.getDOPorts()
+        > d = Device('Dev1')
+        > d.getDOPorts()
         ['Dev1/port0', 'Dev1/port1']
 
     """
@@ -227,18 +227,18 @@ class BaseTask(Task):
     They can still use all of the methods of the PyDAQmx Task object.
 
     Example:
-        >>> from PyDAQmx.DAQmxConstants import *
-        >>> import numpy as np
-        >>> bt = BaseTask()
-        >>> bt.CreateDOChan('Dev1/port0/line0:4',
+        > from PyDAQmx.DAQmxConstants import *
+        > import numpy as np
+        > bt = BaseTask()
+        > bt.CreateDOChan('Dev1/port0/line0:4',
                            '',
                            DAQmx_Val_ChanForAllLines)
-        >>> bt.start()
-        >>> buf = np.array([0,1,0,1], dtype=np.uint8)
-        >>> bt.WriteDigitalLines(1, 0, 10.0, PyDAQmx.DAQmx_Val_GroupByChannel, buf,
+        > bt.start()
+        > buf = np.array([0,1,0,1], dtype=np.uint8)
+        > bt.WriteDigitalLines(1, 0, 10.0, PyDAQmx.DAQmx_Val_GroupByChannel, buf,
                                 None, None)
-        >>> bt.stop()
-        >>> bt.clear()
+        > bt.stop()
+        > bt.clear()
 
     """
     def __init__(self):
@@ -287,7 +287,7 @@ class BaseTask(Task):
             buffer_size (Optional[int]): write buffer size
 
         Examples:
-            >>> mytask.cfg_sample_clock("/Dev1/ai/SampleClock", 'f', 'c', 1000)
+            > mytask.cfg_sample_clock("/Dev1/ai/SampleClock", 'f', 'c', 1000)
 
         """
         edge = get_edge_val(edge)
@@ -312,7 +312,7 @@ class BaseTask(Task):
             edge (str): rising or falling edge
 
         Examples:
-            >>> mytask.cfg_digital_start_trigger("/Dev1/ai/StartTrigger",'r')
+            > mytask.cfg_digital_start_trigger("/Dev1/ai/StartTrigger",'r')
 
         """
         edge = get_edge_val(edge)
@@ -431,12 +431,12 @@ class AnalogInput(BaseTask):
     Examples
     --------
 
-    >>> ai = AnalogInput('Dev1',channels=[0],buffer_size=500)
-    >>> ai.start()
-    >>> for x in range(10):
+    > ai = AnalogInput('Dev1',channels=[0],buffer_size=500)
+    > ai.start()
+    > for x in range(10):
     ...     time.sleep(1) #collects some data
     ...     print(ai.data) #prints the current buffer
-    >>> ai.clear()
+    > ai.clear()
 
     '''
     def __init__(self,
@@ -585,11 +585,11 @@ class AnalogOutput(BaseTask):
     Examples
     --------
 
-    >>> data = 9.95*sin(arange(1000, dtype=float64)*2*pi/1000) #create waveform of some sort
-    >>> ao = AnalogOutput('Dev1',channels=[0])
-    >>> ao.start()
-    >>> ao.write(data) #will write samples only once at the clock speed of board
-    >>> ao.clear()
+    > data = 9.95*sin(arange(1000, dtype=float64)*2*pi/1000) #create waveform of some sort
+    > ao = AnalogOutput('Dev1',channels=[0])
+    > ao.start()
+    > ao.write(data) #will write samples only once at the clock speed of board
+    > ao.clear()
 
     TODO
     ----
@@ -687,10 +687,10 @@ class AnalogFunctionOutput(BaseTask):
     Examples
     --------
 
-    >>> afo = AnalogFunctionOutput('Dev1',channels=[0],ftype='sin',frequency=1)
-    >>> afo.start()
-    >>> time.sleep(10) #output for 10 seconds
-    >>> afo.clear()
+    > afo = AnalogFunctionOutput('Dev1',channels=[0],ftype='sin',frequency=1)
+    > afo.start()
+    > time.sleep(10) #output for 10 seconds
+    > afo.clear()
 
     TODO
     ----
@@ -794,11 +794,11 @@ class DigitalInput(BaseTask):
     Examples
     --------
 
-    >>> task = DigitalInput('Dev1', 0, '0:3') #device 1, port 0, lines 0:3
-    >>> task.start()
-    >>> data = task.read()
-    >>> print(data)
-    >>> task.clear()
+    > task = DigitalInput('Dev1', 0, '0:3') #device 1, port 0, lines 0:3
+    > task.start()
+    > data = task.read()
+    > print(data)
+    > task.clear()
 
     '''
     def __init__(self,
@@ -848,7 +848,7 @@ class DigitalInput(BaseTask):
             uint8 array.
 
         Example:
-            >>> print(di.read())
+            > print(di.read())
             [0 1 0 1 0 1 0 1]
         """
         bytesPerSample = c_long()
@@ -911,10 +911,10 @@ class DigitalInputU32(BaseTask):
     Examples
     --------
 
-    >>> task = DigitalInputU32('Dev1', 32) # all 32 lines
-    >>> task.start()
-    >>> time.sleep(10)  #collect some data
-    >>> task.clear()
+    > task = DigitalInputU32('Dev1', 32) # all 32 lines
+    > task.start()
+    > time.sleep(10)  #collect some data
+    > task.clear()
 
     '''
     def __init__(self,
@@ -1048,13 +1048,13 @@ class DigitalOutput(BaseTask):
     Examples
     --------
 
-    >>> task = DigitalOutput('Dev1',1) #device 1, port 1
-    >>> lines = len(task.get_output_lines())
-    >>> task.start()
-    >>> data = np.array([1]*lines,dtype = np.uint8)
-    >>> task.write(data)
-    >>> task.stop()
-    >>> task.clear()
+    > task = DigitalOutput('Dev1',1) #device 1, port 1
+    > lines = len(task.get_output_lines())
+    > task.start()
+    > data = np.array([1]*lines,dtype = np.uint8)
+    > task.write(data)
+    > task.stop()
+    > task.clear()
 
     ##TODO: Can't figure out how to get buffered finite write to work.
         continuous seems ok.
@@ -1156,8 +1156,8 @@ class DigitalOutput(BaseTask):
         Examples
         --------
 
-        >>> data = np.array([1,0,1,0],dtype=np.uint8)
-        >>> task.Write(data, 1)
+        > data = np.array([1,0,1,0],dtype=np.uint8)
+        > task.Write(data, 1)
 
         ##TODO: Automatically calculate samples per line based on array shape.
 
@@ -1257,7 +1257,7 @@ class DigitalOutput(BaseTask):
         Examples
         --------
 
-        >>> task.writeBit(0,0)  # sets line 0 to 1
+        > task.writeBit(0,0)  # sets line 0 to 1
 
         '''
         self.lastOut[index] = value
@@ -1792,16 +1792,16 @@ def syncit(digital_out_task, line, invert=False):
 
     Examples
     --------
-    >>> import time
-    >>> do = DigitalOutput("Dev1", 0)
-    >>> do.StartTask()
+    > import time
+    > do = DigitalOutput("Dev1", 0)
+    > do.StartTask()
 
-    >>> @syncit(do, 0)
-    >>> def do_stuff():
+    > @syncit(do, 0)
+    > def do_stuff():
     ...     time.sleep(1)
 
-    >>> do_stuff()
-    >>> do.ClearTask()
+    > do_stuff()
+    > do.ClearTask()
 
     """
 
