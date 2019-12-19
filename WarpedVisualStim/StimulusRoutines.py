@@ -711,7 +711,7 @@ class UniformContrast(Stim):
                           dtype=np.float32) * self.color
 
         if not (self.coordinate == 'degree' or self.coordinate == 'linear'):
-            raise LookupError, "`coordinate` value not in {'degree','linear'}"
+            raise LookupError("`coordinate` value not in {'degree','linear'}")
 
         for i in range(len(self.frames)):
             curr_frame = self.frames[i]
@@ -1061,7 +1061,7 @@ class FlashingCircle(Stim):
         frames = frames[self.midgap_frame_num:]
 
         if not self.indicator.is_sync:
-            for frame_ind in xrange(frames.shape[0]):
+            for frame_ind in range(frames.shape[0]):
                 # mark unsynchronized indicator
                 if np.floor(frame_ind // self.indicator.frame_num) % 2 == 0:
                     frames[frame_ind, 1] = 1.
@@ -1083,7 +1083,7 @@ class FlashingCircle(Stim):
             frames = (gap, flash)
             return frames
         else:
-            raise NotImplementedError, "method not available for non-sync indicator"
+            raise NotImplementedError("method not available for non-sync indicator")
 
     def _generate_display_index(self):
         """ compute a list of indices corresponding to each frame to display. """
@@ -1100,7 +1100,7 @@ class FlashingCircle(Stim):
 
             return index_to_display
         else:
-            raise NotImplementedError, "method not available for non-sync indicator"
+            raise NotImplementedError("method not available for non-sync indicator")
 
     def generate_movie_by_index(self):
         """ compute the stimulus movie to be displayed by index. """
@@ -1139,7 +1139,7 @@ class FlashingCircle(Stim):
             map_azi = self.monitor.lin_coord_x
             map_alt = self.monitor.lin_coord_y
         else:
-            raise LookupError, "`coordinate` not in {'linear','degree'}"
+            raise LookupError("`coordinate` not in {'linear','degree'}")
 
         circle_mask = get_circle_mask(map_alt=map_alt, map_azi=map_azi,
                                       center=self.center, radius=self.radius,
@@ -1201,7 +1201,7 @@ class FlashingCircle(Stim):
             map_azi = self.monitor.lin_coord_x
             map_alt = self.monitor.lin_coord_y
         else:
-            raise LookupError, "`coordinate` not in {'linear','degree'}"
+            raise LookupError("`coordinate` not in {'linear','degree'}")
 
         circle_mask = get_circle_mask(map_alt=map_alt, map_azi=map_azi,
                                       center=self.center, radius=self.radius,
@@ -1499,7 +1499,7 @@ class SparseNoise(Stim):
 
             return frames_unique
         else:
-            raise NotImplementedError, "method not available for non-sync indicator"
+            raise NotImplementedError("method not available for non-sync indicator")
 
     @staticmethod
     def _get_probe_index_for_one_iter_on_off(frames_unique):
@@ -2183,7 +2183,7 @@ class LocallySparseNoise(Stim):
             return frames_unique, index_to_display
 
         else:
-            raise NotImplementedError, "method not available for non-sync indicator"
+            raise NotImplementedError("method not available for non-sync indicator")
 
     def generate_movie_by_index(self):
 
@@ -2365,7 +2365,7 @@ class DriftingGratingCircle(Stim):
                 # print(0.95 * period)
                 error_msg = ('Duration of each block times tf ' + str(tf)
                              + ' should be close to a whole number!')
-                raise ValueError, error_msg
+                raise ValueError(error_msg)
 
     @property
     def midgap_frame_num(self):
@@ -2616,7 +2616,7 @@ class DriftingGratingCircle(Stim):
 
             return frames_unique, condi_ind_in_frames_unique
         else:
-            raise NotImplementedError, "method not available for non-sync indicator"
+            raise NotImplementedError("method not available for non-sync indicator")
 
     def _generate_display_index(self):
         """ compute a list of indices corresponding to each frame to display. """
@@ -2659,7 +2659,7 @@ class DriftingGratingCircle(Stim):
             coord_azi = self.monitor.lin_coord_x
             coord_alt = self.monitor.lin_coord_y
         else:
-            raise LookupError, "`coordinate` not in {'linear','degree'}"
+            raise LookupError("`coordinate` not in {'linear','degree'}")
 
         indicator_width_min = (self.indicator.center_width_pixel
                                - self.indicator.width_pixel / 2)
@@ -2759,7 +2759,7 @@ class DriftingGratingCircle(Stim):
             coord_azi = self.monitor.lin_coord_x
             coord_alt = self.monitor.lin_coord_y
         else:
-            raise LookupError, "`coordinate` not in {'linear','degree'}"
+            raise LookupError("`coordinate` not in {'linear','degree'}")
 
         indicator_width_min = (self.indicator.center_width_pixel
                                - self.indicator.width_pixel / 2)
@@ -3055,7 +3055,7 @@ class StaticGratingCircle(Stim):
 
             return frames_unique, index_to_display
         else:
-            raise NotImplementedError, "method not available for non-sync indicator."
+            raise NotImplementedError("method not available for non-sync indicator.")
 
     def generate_movie_by_index(self):
         """ compute the stimulus movie to be displayed by index. """
@@ -3076,7 +3076,7 @@ class StaticGratingCircle(Stim):
             coord_azi = self.monitor.lin_coord_x
             coord_alt = self.monitor.lin_coord_y
         else:
-            raise LookupError, "`coordinate` not in {'linear','degree'}"
+            raise LookupError("`coordinate` not in {'linear','degree'}")
 
         indicator_width_min = (self.indicator.center_width_pixel
                                - self.indicator.width_pixel / 2)
@@ -3476,7 +3476,7 @@ class StaticImages(Stim):
             return frames_unique, index_to_display
 
         else:
-            raise NotImplementedError, "method not available for non-sync indicator."
+            raise NotImplementedError("method not available for non-sync indicator.")
 
     def generate_movie_by_index(self):
         """ compute the stimulus movie to be displayed by index. """
@@ -3491,7 +3491,7 @@ class StaticImages(Stim):
             coord_azi = self.monitor.lin_coord_x
             coord_alt = self.monitor.lin_coord_y
         else:
-            raise LookupError, "`coordinate` not in {'linear','degree'}"
+            raise LookupError("`coordinate` not in {'linear','degree'}")
 
         indicator_width_min = (self.indicator.center_width_pixel
                                - self.indicator.width_pixel / 2)
@@ -3607,7 +3607,7 @@ class StimulusSeparator(Stim):
             index_to_display += [0] * self.postgap_frame_num
             return frames_unique, index_to_display
         else:
-            raise NotImplementedError, "method not available for non-sync indicator."
+            raise NotImplementedError("method not available for non-sync indicator.")
 
     def generate_movie_by_index(self):
 
@@ -3620,7 +3620,7 @@ class StimulusSeparator(Stim):
             coord_azi = self.monitor.lin_coord_x
             coord_alt = self.monitor.lin_coord_y
         else:
-            raise LookupError, "`coordinate` not in {'linear','degree'}"
+            raise LookupError("`coordinate` not in {'linear','degree'}")
 
         indicator_width_min = (self.indicator.center_width_pixel
                                - self.indicator.width_pixel / 2)
@@ -3659,18 +3659,18 @@ class CombinedStimuli(Stim):
     the stimulus class that can combine different stimuli into one session.
 
     example:
-    >>> import retinotopic_mapping.StimulusRoutines as stim
-    >>> from retinotopic_mapping.MonitorSetup import Monitor, Indicator
-    >>> from retinotopic_mapping.DisplayStimulus import DisplaySequence
-    >>> mon = Monitor(resolution=(1200, 1920), dis=15., mon_width_cm=52., mon_height_cm=32.)
-    >>> ind = Indicator(mon)
-    >>> uc = stim.UniformContrast(mon, ind, duration=10., color=-1.)
-    >>> ss = stim.StimulusSeparator(mon, ind)
-    >>> cs = stim.CombinedStimuli(mon, ind)
-    >>> cs.set_stimuli([ss, uc, ss])
-    >>> ds = DisplaySequence(log_dir='C:/data')
-    >>> ds.set_stim(cs)
-    >>> ds.trigger_display()
+    > import retinotopic_mapping.StimulusRoutines as stim
+    > from retinotopic_mapping.MonitorSetup import Monitor, Indicator
+    > from retinotopic_mapping.DisplayStimulus import DisplaySequence
+    > mon = Monitor(resolution=(1200, 1920), dis=15., mon_width_cm=52., mon_height_cm=32.)
+    > ind = Indicator(mon)
+    > uc = stim.UniformContrast(mon, ind, duration=10., color=-1.)
+    > ss = stim.StimulusSeparator(mon, ind)
+    > cs = stim.CombinedStimuli(mon, ind)
+    > cs.set_stimuli([ss, uc, ss])
+    > ds = DisplaySequence(log_dir='C:/data')
+    > ds.set_stim(cs)
+    > ds.trigger_display()
 
     Parameters
     ----------
@@ -3895,7 +3895,7 @@ class KSstim(Stim):
             map_y = self.monitor.lin_coord_y
 
         else:
-            raise LookupError, '`coordinate` not in {"degree","linear"}'
+            raise LookupError('`coordinate` not in {"degree","linear"}')
 
         min_x = map_x.min()
         max_x = map_x.max()
@@ -3967,7 +3967,7 @@ class KSstim(Stim):
             map_x = self.monitor.lin_coord_x
             map_y = self.monitor.lin_coord_y
         else:
-            raise LookupError, '`coordinate` not in {"degree", "linear"}'
+            raise LookupError('`coordinate` not in {"degree", "linear"}')
 
         min_x = map_x.min()
         max_x = map_x.max()
@@ -3988,7 +3988,7 @@ class KSstim(Stim):
             step_x = np.arange(min_x - sweep_width,
                                max_x + step_width, step_width)[::-1]
         else:
-            raise LookupError, '`direction` not in {"B2U","U2B","L2R","R2L"}'
+            raise LookupError('`direction` not in {"B2U","U2B","L2R","R2L"}')
 
         sweep_table = []
 
@@ -4169,7 +4169,7 @@ class KSstim(Stim):
             self.direction = direction
             self.clear()
         else:
-            raise LookupError, '`direction` not in {"B2U","U2B","L2R","R2L"}'
+            raise LookupError('`direction` not in {"B2U","U2B","L2R","R2L"}')
 
     def set_sweep_sigma(self, sweepSigma):
         self.sweepSigma = sweepSigma

@@ -221,7 +221,7 @@ class DisplaySequence(object):
         if display_iter % 1 == 0:
             self.display_iter = display_iter
         else:
-            raise ArithmeticError, "`display_iter` should be a whole number."
+            raise ArithmeticError("`display_iter` should be a whole number.")
 
         self.log_dir = log_dir
         self.backupdir = backupdir
@@ -246,7 +246,7 @@ class DisplaySequence(object):
             'stimulation') after displayed.
         """
         if len(any_array.shape) != 3:
-            raise LookupError, "Input numpy array should have dimension of 3!"
+            raise LookupError("Input numpy array should have dimension of 3!")
 
         vmax = np.amax(any_array).astype(np.float32)
         vmin = np.amin(any_array).astype(np.float32)
@@ -258,7 +258,7 @@ class DisplaySequence(object):
             if type(log_dict) is dict:
                 self.seq_log = log_dict
             else:
-                raise ValueError, '`log_dict` should be a dictionary!'
+                raise ValueError('`log_dict` should be a dictionary!')
         else:
             self.seq_log = {}
         self.clear()
@@ -313,16 +313,16 @@ class DisplaySequence(object):
 
         Examples
         --------
-        >>> import matplotlib.pyplot as plt
-        >>> import retinotopic_mapping.StimulusRoutines as stim
-        >>> from retinotopic_mapping.MonitorSetup import Monitor, Indicator
-        >>> from retinotopic_mapping.DisplayStimulus import DisplaySequence
-        >>> mon = Monitor(resolution=(1200, 1920), dis=15., mon_width_cm=52., mon_height_cm=32.)
-        >>> ind = Indicator(mon)
-        >>> ds = DisplaySequence(log_dir='C:/data')
-        >>> uc = stim.UniformContrast(monitor=mon, indicator=ind, duration=10., color=-1.)
-        >>> ds.set_stim(uc)
-        >>> ds.trigger_display()
+        > import matplotlib.pyplot as plt
+        > import retinotopic_mapping.StimulusRoutines as stim
+        > from retinotopic_mapping.MonitorSetup import Monitor, Indicator
+        > from retinotopic_mapping.DisplayStimulus import DisplaySequence
+        > mon = Monitor(resolution=(1200, 1920), dis=15., mon_width_cm=52., mon_height_cm=32.)
+        > ind = Indicator(mon)
+        > ds = DisplaySequence(log_dir='C:/data')
+        > uc = stim.UniformContrast(monitor=mon, indicator=ind, duration=10., color=-1.)
+        > ds.set_stim(uc)
+        > ds.trigger_display()
         """
 
         # --------------- early preparation for display--------------------
@@ -501,8 +501,7 @@ class DisplaySequence(object):
             print('Trigger detected. Start displaying...\n\n')
             return True
         else:
-            raise NameError, "`trigger` not in " \
-                             "{'negative_edge','positive_edge', 'high_level','low_level'}!"
+            raise NameError("`trigger` not in {'negative_edge','positive_edge', 'high_level','low_level'}!")
 
     def _get_file_name(self):
         """
@@ -618,7 +617,7 @@ class DisplaySequence(object):
     def _update_display_status(self):
 
         if self.keep_display is None:
-            raise LookupError, 'self.keep_display should start as True'
+            raise LookupError('self.keep_display should start as True')
 
         # check keyboard input 'q' or 'escape'
         keyList = event.getKeys(['q', 'escape'])
@@ -631,7 +630,7 @@ class DisplaySequence(object):
         if display_iter % 1 == 0:
             self.display_iter = display_iter
         else:
-            raise ArithmeticError, "`display_iter` should be a whole number."
+            raise ArithmeticError("`display_iter` should be a whole number.")
         self.clear()
 
     def save_log(self):
