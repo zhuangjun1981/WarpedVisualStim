@@ -44,6 +44,8 @@ conda env create --name warpedvisualstim python=3.7
 activate warpedvisualstim (Windows)
 source activate warpedvisualstim (Mac or Linux)
 python setup.py install
+pip install psychopy
+pip install pytest
 ```
 
 
