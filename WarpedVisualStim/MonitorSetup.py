@@ -278,13 +278,13 @@ class Monitor(object):
         lookupI = np.zeros(degCorX.shape).astype(np.int32)
         lookupJ = np.zeros(degCorX.shape).astype(np.int32)
 
-        for j in xrange(lookupI.shape[1]):
+        for j in range(lookupI.shape[1]):
             currDegX = degCorX[0, j]
             diffDegX = degNoWarpCorX[0, :] - currDegX
             IndJ = np.argmin(np.abs(diffDegX))
             lookupJ[:, j] = IndJ
 
-            for i in xrange(lookupI.shape[0]):
+            for i in range(lookupI.shape[0]):
                 currDegY = degCorY[i, j]
                 diffDegY = degNoWarpCorY[:, IndJ] - currDegY
                 indI = np.argmin(np.abs(diffDegY))
