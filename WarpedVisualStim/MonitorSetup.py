@@ -118,8 +118,8 @@ class Monitor(object):
         self.C2P_cm = self.mon_width_cm - self.C2A_cm
 
         resolution = [0, 0]
-        resolution[0] = self.resolution[0] / downsample_rate
-        resolution[1] = self.resolution[1] / downsample_rate
+        resolution[0] = int(self.resolution[0] / downsample_rate)
+        resolution[1] = int(self.resolution[1] / downsample_rate)
 
         map_coord_x, map_coord_y = np.meshgrid(range(resolution[1]),
                                                range(resolution[0]))
@@ -183,11 +183,11 @@ class Monitor(object):
         """
 
         resolution = [0, 0]
-        resolution[0] = self.resolution[0] / self.downsample_rate
-        resolution[1] = self.resolution[1] / self.downsample_rate
+        resolution[0] = int(self.resolution[0] / self.downsample_rate)
+        resolution[1] = int(self.resolution[1] / self.downsample_rate)
 
-        map_coord_x, map_coord_y = np.meshgrid(range(resolution[1]),
-                                               range(resolution[0]))
+        # map_coord_x, map_coord_y = np.meshgrid(range(resolution[1]),
+        #                                        range(resolution[0]))
 
         new_map_x = np.zeros(resolution, dtype=np.float32)
         new_map_y = np.zeros(resolution, dtype=np.float32)

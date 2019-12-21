@@ -1,6 +1,7 @@
 import os
 import unittest
-from .. import DisplayStimulus as ds
+# from .. import DisplayStimulus as ds
+import WarpedVisualStim.DisplayStimulus as ds
 
 curr_folder = os.path.dirname(os.path.realpath(__file__))
 os.chdir(curr_folder)
@@ -9,7 +10,8 @@ class TestSimulation(unittest.TestCase):
 
     def setUp(self):
 
-        import retinotopic_mapping.MonitorSetup as ms
+        # from .. import MonitorSetup as ms
+        import WarpedVisualStim.MonitorSetup as ms
 
         # Setup monitor/indicator objects
         self.monitor = ms.Monitor(resolution=(1200, 1600), dis=15.,
@@ -25,7 +27,7 @@ class TestSimulation(unittest.TestCase):
 
     def test_initial_background(self):
 
-        import retinotopic_mapping.StimulusRoutines as stim
+        import WarpedVisualStim.StimulusRoutines as stim
 
         log_dir = os.path.join(curr_folder, 'test_data')
 

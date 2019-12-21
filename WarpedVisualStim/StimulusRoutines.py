@@ -643,14 +643,14 @@ class UniformContrast(Stim):
                                 dtype=np.float32) * self.background
 
         # Compute pixel coordinates for indicator
-        indicator_width_min = (self.indicator.center_width_pixel
-                               - self.indicator.width_pixel / 2)
-        indicator_width_max = (self.indicator.center_width_pixel
-                               + self.indicator.width_pixel / 2)
-        indicator_height_min = (self.indicator.center_height_pixel
-                                - self.indicator.height_pixel / 2)
-        indicator_height_max = (self.indicator.center_height_pixel
-                                + self.indicator.height_pixel / 2)
+        indicator_width_min = int(self.indicator.center_width_pixel
+                                  - self.indicator.width_pixel / 2)
+        indicator_width_max = int(self.indicator.center_width_pixel
+                                  + self.indicator.width_pixel / 2)
+        indicator_height_min = int(self.indicator.center_height_pixel
+                                   - self.indicator.height_pixel / 2)
+        indicator_height_max = int(self.indicator.center_height_pixel
+                                   + self.indicator.height_pixel / 2)
 
         display = self.color * np.ones((num_pixels_width,num_pixels_height),
                                        dtype=np.float32)

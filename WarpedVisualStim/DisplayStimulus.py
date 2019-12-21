@@ -529,7 +529,7 @@ class DisplaySequence(object):
         """
         frame_ts_start = []
         frame_ts_end = []
-        start_time = time.clock()
+        start_time = time.process_time()
 
         if self.is_by_index:
             index_to_display = self.seq_log['stimulation']['index_to_display']
@@ -577,7 +577,7 @@ class DisplaySequence(object):
                 _ = syncPulseTask.write(np.array([1]).astype(np.uint8))
 
             # save frame start timestamp
-            frame_ts_start.append(time.clock() - start_time)
+            frame_ts_start.append(time.process_time() - start_time)
 
             # show visual stim
             window.flip()
@@ -589,7 +589,7 @@ class DisplaySequence(object):
                 self.displayed_frames.append(self.seq_log['stimulation']['frames'][frame_index])
 
             # save frame end timestamp
-            frame_ts_end.append(time.clock() - start_time)
+            frame_ts_end.append(time.process_time() - start_time)
 
             # set sync pulse end signal
             if self.is_sync_pulse:
@@ -598,7 +598,7 @@ class DisplaySequence(object):
             self._update_display_status()
             i += 1
 
-        stop_time = time.clock()
+        stop_time = time.process_time()
         window.close()
 
         if self.is_sync_pulse:
