@@ -1,6 +1,6 @@
-import retinotopic_mapping.StimulusRoutines as stim
-from retinotopic_mapping.DisplayStimulus import DisplaySequence
-from retinotopic_mapping.MonitorSetup import Monitor, Indicator
+import WarpedVisualStim.StimulusRoutines as stim
+from WarpedVisualStim.DisplayStimulus import DisplaySequence
+from WarpedVisualStim.MonitorSetup import Monitor, Indicator
 
 mon = Monitor(resolution=(1200, 1920), dis=15., mon_width_cm=52., mon_height_cm=32.)
 ind = Indicator(mon)

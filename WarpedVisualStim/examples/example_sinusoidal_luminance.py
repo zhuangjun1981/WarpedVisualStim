@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
-import retinotopic_mapping.StimulusRoutines as stim
-from retinotopic_mapping.MonitorSetup import Monitor, Indicator
-from retinotopic_mapping.DisplayStimulus import DisplaySequence
+import WarpedVisualStim.StimulusRoutines as stim
+from WarpedVisualStim.MonitorSetup import Monitor, Indicator
+from WarpedVisualStim.DisplayStimulus import DisplaySequence
 
 # Initialize Monitor object
 mon = Monitor(resolution=(1200, 1920), dis=15., mon_width_cm=52., mon_height_cm=32.)

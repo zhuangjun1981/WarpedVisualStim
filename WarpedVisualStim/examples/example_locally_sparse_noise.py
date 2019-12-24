@@ -12,9 +12,9 @@ running all you need to do is press either one of the 'Esc' or 'q' buttons.
 
 import numpy as np
 import matplotlib.pyplot as plt
-import retinotopic_mapping.StimulusRoutines as stim
-from retinotopic_mapping.MonitorSetup import Monitor, Indicator
-from retinotopic_mapping.DisplayStimulus import DisplaySequence
+import WarpedVisualStim.StimulusRoutines as stim
+from WarpedVisualStim.MonitorSetup import Monitor, Indicator
+from WarpedVisualStim.DisplayStimulus import DisplaySequence
 
 """
 To get up and running quickly before performing any experiments it is 
