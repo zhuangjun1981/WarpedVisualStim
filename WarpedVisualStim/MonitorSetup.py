@@ -216,7 +216,7 @@ class Monitor(object):
         f1 = plt.figure(figsize=(12, 7))
         f1.suptitle('Remap monitor', fontsize=14, fontweight='bold')
 
-        OMX = plt.subplot(221)
+        OMX = f1.add_subplot(221)
         OMX.set_title('Linear Map X (cm)')
         currfig = plt.imshow(self.lin_coord_x)
         levels1 = range(int(np.floor(self.lin_coord_x.min() / 10) * 10),
@@ -224,9 +224,9 @@ class Monitor(object):
         im1 = plt.contour(mapcorX, mapcorY, self.lin_coord_x, levels1, colors='k', linewidth=2)
         #        plt.clabel(im1, levels1, fontsize = 10, inline = 1, fmt='%2.1f')
         f1.colorbar(currfig, ticks=levels1)
-        plt.gca().set_axis_off()
+        OMX.set_axis_off()
 
-        OMY = plt.subplot(222)
+        OMY = f1.add_subplot(222)
         OMY.set_title('Linear Map Y (cm)')
         currfig = plt.imshow(self.lin_coord_y)
         levels2 = range(int(np.floor(self.lin_coord_y.min() / 10) * 10),
@@ -234,9 +234,9 @@ class Monitor(object):
         im2 = plt.contour(mapcorX, mapcorY, self.lin_coord_y, levels2, colors='k', linewidth=2)
         #        plt.clabel(im2, levels2, fontsize = 10, inline = 1, fmt='%2.2f')
         f1.colorbar(currfig, ticks=levels2)
-        plt.gca().set_axis_off()
+        OMY.set_axis_off()
 
-        NMX = plt.subplot(223)
+        NMX = f1.add_subplot(223)
         NMX.set_title('Spherical Map X (deg)')
         currfig = plt.imshow(self.deg_coord_x)
         levels3 = range(int(np.floor(self.deg_coord_x.min() / 10) * 10),
@@ -244,9 +244,9 @@ class Monitor(object):
         im3 = plt.contour(mapcorX, mapcorY, self.deg_coord_x, levels3, colors='k', linewidth=2)
         #        plt.clabel(im3, levels3, fontsize = 10, inline = 1, fmt='%2.1f')
         f1.colorbar(currfig, ticks=levels3)
-        plt.gca().set_axis_off()
+        NMX.set_axis_off()
         #
-        NMY = plt.subplot(224)
+        NMY = f1.add_subplot(224)
         NMY.set_title('Spherical Map Y (deg)')
         currfig = plt.imshow(self.deg_coord_y)
         levels4 = range(int(np.floor(self.deg_coord_y.min() / 10) * 10),
@@ -254,7 +254,7 @@ class Monitor(object):
         im4 = plt.contour(mapcorX, mapcorY, self.deg_coord_y, levels4, colors='k', linewidth=2)
         #        plt.clabel(im4, levels4, fontsize = 10, inline = 1, fmt='%2.1f')
         f1.colorbar(currfig, ticks=levels4)
-        plt.gca().set_axis_off()
+        NMY.set_axis_off()
 
     def generate_lookup_table(self):
         """

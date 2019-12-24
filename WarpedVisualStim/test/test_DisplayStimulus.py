@@ -1,6 +1,7 @@
 import os
 import unittest
 # from .. import DisplayStimulus as ds
+
 import WarpedVisualStim.DisplayStimulus as ds
 
 curr_folder = os.path.dirname(os.path.realpath(__file__))

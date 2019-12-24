@@ -13,7 +13,6 @@ from .tools import ImageAnalysis as ia
 from .tools import FileTools as ft
 
 
-
 def in_hull(p, hull):
     """
     Determine if points in `p` are in `hull`
@@ -867,7 +866,7 @@ class SinusoidalLuminance(Stim):
         midgap_ind = [0] * int(self.midgap_dur * self.monitor.refresh_rate)
 
         frames_per_cycle = int(np.round(self.monitor.refresh_rate / self.frequency))
-        cycle_ind = midgap_ind + range(1, frames_per_cycle + 1)
+        cycle_ind = midgap_ind + list(range(1, frames_per_cycle + 1))
 
         display_ind = cycle_ind * self.cycle_num
         display_ind = display_ind[len(midgap_ind):]
@@ -1118,14 +1117,14 @@ class FlashingCircle(Stim):
                                                    num_pixels_height),
                                                    dtype=np.float32)
 
-        indicator_width_min = (self.indicator.center_width_pixel
-                               - self.indicator.width_pixel / 2)
-        indicator_width_max = (self.indicator.center_width_pixel
-                               + self.indicator.width_pixel / 2)
-        indicator_height_min = (self.indicator.center_height_pixel
-                                - self.indicator.height_pixel / 2)
-        indicator_height_max = (self.indicator.center_height_pixel
-                                + self.indicator.height_pixel / 2)
+        indicator_width_min = int(self.indicator.center_width_pixel
+                                  - self.indicator.width_pixel / 2)
+        indicator_width_max = int(self.indicator.center_width_pixel
+                                  + self.indicator.width_pixel / 2)
+        indicator_height_min = int(self.indicator.center_height_pixel
+                                   - self.indicator.height_pixel / 2)
+        indicator_height_max = int(self.indicator.center_height_pixel
+                                   + self.indicator.height_pixel / 2)
 
         # background = self.background * np.ones((num_pixels_width,
         #                                         num_pixels_height),
@@ -1180,14 +1179,14 @@ class FlashingCircle(Stim):
                              self.monitor.deg_coord_x.shape[1]),
                             dtype=np.float32)
 
-        indicator_width_min = (self.indicator.center_width_pixel -
-                               (self.indicator.width_pixel / 2))
-        indicator_width_max = (self.indicator.center_width_pixel +
-                               (self.indicator.width_pixel / 2))
-        indicator_height_min = (self.indicator.center_height_pixel -
-                                (self.indicator.height_pixel / 2))
-        indicator_height_max = (self.indicator.center_height_pixel +
-                                (self.indicator.height_pixel / 2))
+        indicator_width_min = int((self.indicator.center_width_pixel -
+                                  (self.indicator.width_pixel / 2)))
+        indicator_width_max = int((self.indicator.center_width_pixel +
+                                  (self.indicator.width_pixel / 2)))
+        indicator_height_min = int((self.indicator.center_height_pixel -
+                                   (self.indicator.height_pixel / 2)))
+        indicator_height_max = int((self.indicator.center_height_pixel +
+                                   (self.indicator.height_pixel / 2)))
 
         background = np.ones((np.size(self.monitor.deg_coord_x, 0),
                               np.size(self.monitor.deg_coord_x, 1)),
@@ -1219,11 +1218,11 @@ class FlashingCircle(Stim):
                                ((-1 * (circle_mask - 1)) * background))
 
             curr_FC_seq[indicator_height_min:indicator_height_max,
-            indicator_width_min:indicator_width_max] = curr_frame[1]
+                        indicator_width_min:indicator_width_max] = curr_frame[1]
 
             full_seq[i] = curr_FC_seq
 
-            if i in range(0, len(self.frames), len(self.frames) / 10):
+            if i in range(0, len(self.frames), int(len(self.frames) / 10)):
                 print('Generating numpy sequence: '
                        + str(int(100 * (i + 1) / len(self.frames))) + '%')
 
@@ -1619,14 +1618,14 @@ class SparseNoise(Stim):
                              'Should be either "linear" or "degree".'.
                              format(self.coordinate))
 
-        indicator_width_min = (self.indicator.center_width_pixel
-                               - self.indicator.width_pixel / 2)
-        indicator_width_max = (self.indicator.center_width_pixel
-                               + self.indicator.width_pixel / 2)
-        indicator_height_min = (self.indicator.center_height_pixel
-                                - self.indicator.height_pixel / 2)
-        indicator_height_max = (self.indicator.center_height_pixel
-                                + self.indicator.height_pixel / 2)
+        indicator_width_min = int(self.indicator.center_width_pixel
+                                  - self.indicator.width_pixel / 2)
+        indicator_width_max = int(self.indicator.center_width_pixel
+                                  + self.indicator.width_pixel / 2)
+        indicator_height_min = int(self.indicator.center_height_pixel
+                                   - self.indicator.height_pixel / 2)
+        indicator_height_max = int(self.indicator.center_height_pixel
+                                   + self.indicator.height_pixel / 2)
 
         full_seq = self.background * \
                    np.ones((num_unique_frames, num_pixels_width, num_pixels_height), dtype=np.float32)
@@ -1646,7 +1645,7 @@ class SparseNoise(Stim):
                 full_seq[i] = disp_mat
 
             full_seq[i, indicator_height_min:indicator_height_max,
-            indicator_width_min:indicator_width_max] = frame[3]
+                     indicator_width_min:indicator_width_max] = frame[3]
 
         mondict = dict(self.monitor.__dict__)
         indicator_dict = dict(self.indicator.__dict__)
@@ -1678,14 +1677,14 @@ class SparseNoise(Stim):
                              'Should be either "linear" or "degree".'.
                              format(self.coordinate))
 
-        indicator_width_min = (self.indicator.center_width_pixel
-                               - self.indicator.width_pixel / 2)
-        indicator_width_max = (self.indicator.center_width_pixel
-                               + self.indicator.width_pixel / 2)
-        indicator_height_min = (self.indicator.center_height_pixel
-                                - self.indicator.height_pixel / 2)
-        indicator_height_max = (self.indicator.center_height_pixel
-                                + self.indicator.height_pixel / 2)
+        indicator_width_min = int(self.indicator.center_width_pixel
+                                  - self.indicator.width_pixel / 2)
+        indicator_width_max = int(self.indicator.center_width_pixel
+                                  + self.indicator.width_pixel / 2)
+        indicator_height_min = int(self.indicator.center_height_pixel
+                                   - self.indicator.height_pixel / 2)
+        indicator_height_max = int(self.indicator.center_height_pixel
+                                   + self.indicator.height_pixel / 2)
 
         full_seq = np.ones((len(self.frames),
                             self.monitor.deg_coord_x.shape[0],
@@ -1729,9 +1728,9 @@ class SparseNoise(Stim):
 
             # add sync square for photodiode
             full_seq[i, indicator_height_min:indicator_height_max,
-            indicator_width_min:indicator_width_max] = curr_frame[3]
+                        indicator_width_min:indicator_width_max] = curr_frame[3]
 
-            if i in range(0, len(self.frames), len(self.frames) / 10):
+            if i in range(0, len(self.frames), int(len(self.frames) / 10)):
                 print('Generating numpy sequence: ' +
                        str(int(100 * (i + 1) / len(self.frames))) + '%')
 
@@ -1951,13 +1950,9 @@ class LocallySparseNoise(Stim):
 
         for probe in probes:
 
-            # print len(probes)
-
             is_overlap = False
 
             for probe_frame in probes_one_frame:
-                # print probe
-                # print probe_frame
                 curr_dis = ia.distance([probe[0], probe[1]], [probe_frame[0], probe_frame[1]])
                 if curr_dis <= self.min_distance:
                     is_overlap = True
@@ -2163,7 +2158,7 @@ class LocallySparseNoise(Stim):
 
             frames_unique = self._generate_frames_for_index_display()
             if len(frames_unique) % 2 == 1:
-                display_num = (len(frames_unique) - 1) / 2  # number of each unique display frame
+                display_num = int((len(frames_unique) - 1) / 2)  # number of each unique display frame
             else:
                 raise ValueError('LocallySparseNoise: number of unique frames is not correct. Should be odd.')
 
@@ -2360,9 +2355,6 @@ class DriftingGratingCircle(Stim):
         for tf in tf_list:
             period = 1. / tf
             if (0.05 * period) < (block_dur % period) < (0.95 * period):
-                # print(period)
-                # print(block_dur % period)
-                # print(0.95 * period)
                 error_msg = ('Duration of each block times tf ' + str(tf)
                              + ' should be close to a whole number!')
                 raise ValueError(error_msg)
@@ -2597,14 +2589,13 @@ class DriftingGratingCircle(Stim):
                                         'index_to_display': index_to_display_condi}
                                    })
 
-            condi_keys = condi_dict.keys()
+            condi_keys = list(condi_dict.keys())
             condi_keys.sort()
 
             # handle frames_unique
             frames_unique = []
             gap_frame = (0., None, None, None, None, None, None, None, -1.)
             frames_unique.append(gap_frame)
-            condi_keys.sort()
             condi_ind_in_frames_unique = {}
 
             for condi_key in condi_keys:
@@ -3036,12 +3027,12 @@ class StaticGratingCircle(Stim):
 
             if len(frames_unique) % 2 != 1:
                 raise ValueError('StaticGratingCircle: the number of unique frames should odd.')
-            condition_num = (len(frames_unique) - 1) / 2
+            condition_num = int((len(frames_unique) - 1) / 2)
 
             index_to_display = [0] * self.pregap_frame_num
 
             for iter in range(self.iteration):
-                display_sequence = range(condition_num)
+                display_sequence = list(range(condition_num))
                 random.shuffle(display_sequence)
                 for cond_ind in display_sequence:
                     index_to_display += [0] * self.midgap_frame_num
@@ -3456,12 +3447,12 @@ class StaticImages(Stim):
 
             if len(frames_unique) % 2 != 1:
                 raise ValueError('StaticGratingCircle: the number of unique frames should odd.')
-            img_num = (len(frames_unique) - 1) / 2
+            img_num = int((len(frames_unique) - 1) / 2)
 
             index_to_display = [0] * self.pregap_frame_num
 
             for iter in range(self.iteration):
-                display_sequence = range(img_num)
+                display_sequence = list(range(img_num))
                 random.shuffle(display_sequence)
                 for cond_ind in display_sequence:
                     index_to_display += [0] * self.midgap_frame_num
@@ -4143,7 +4134,7 @@ class KSstim(Stim):
 
             full_seq[i] = curr_NM_seq
 
-            if i in range(0, len(self.frames), len(self.frames) / 10):
+            if i in range(0, len(self.frames), int(len(self.frames) / 10)):
                 print('Generating numpy sequence: ' + str(int(100 * (i + 1) / len(self.frames))) + '%')
 
         mondict = dict(self.monitor.__dict__)

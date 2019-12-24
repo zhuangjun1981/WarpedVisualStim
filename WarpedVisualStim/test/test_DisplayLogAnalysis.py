@@ -1,6 +1,7 @@
 import os
 import unittest
 # from .. import DisplayLogAnalysis as dla
+
 import WarpedVisualStim.DisplayLogAnalysis as dla
 
 curr_folder = os.path.dirname(os.path.realpath(__file__))

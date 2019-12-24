@@ -1,11 +1,14 @@
 import os
 import unittest
-from .. import StimulusRoutines as sr
+# from .. import MonitorSetup as ms
+# from .. import StimulusRoutines as sr
+
+import WarpedVisualStim.MonitorSetup as ms
+import WarpedVisualStim.StimulusRoutines as sr
 
 class TestSimulation(unittest.TestCase):
 
     def setUp(self):
-        import retinotopic_mapping.MonitorSetup as ms
 
         # Setup monitor/indicator objects
         self.monitor = ms.Monitor(resolution=(1200,1600), dis=15.,
@@ -247,7 +250,7 @@ class TestSimulation(unittest.TestCase):
         # print max(index_to_display)
         # print len(frames_unique)
         assert (max(index_to_display) == len(frames_unique) -1)
-        probe_num = (len(index_to_display) - 18) / 6
+        probe_num = int((len(index_to_display) - 18) / 6)
         for probe_ind in range(probe_num):
             assert (len(set(index_to_display[6 + probe_ind * 6: 9 + probe_ind * 6])) == 1)
             assert (len(set(index_to_display[9 + probe_ind * 6: 12 + probe_ind * 6])) == 1)
@@ -283,7 +286,7 @@ class TestSimulation(unittest.TestCase):
 
         # frame_num_iter = (len(index_to_display) - 18 - 30) / 2
         assert ((len(index_to_display) - 48) % (8 * 2) == 0)
-        probe_num = (len(index_to_display) - 48) / (8 * 2)
+        probe_num = int((len(index_to_display) - 48) / (8 * 2))
         for probe_ind in range(probe_num):
             assert (len(set(index_to_display[30 + probe_ind * 8: 34 + probe_ind * 8])) == 1)
             assert (len(set(index_to_display[34 + probe_ind * 8: 38 + probe_ind * 8])) == 1)
@@ -401,7 +404,7 @@ class TestSimulation(unittest.TestCase):
         # print len(conditions)
         assert (len(conditions) == 1)
         frames_unique_condi, index_to_display_condi = dgc._generate_frames_for_index_display_condition(conditions[0])
-        assert (index_to_display_condi == range(30) * 4)
+        assert (index_to_display_condi == list(range(30)) * 4)
         assert (max(index_to_display_condi) == len(frames_unique_condi) - 1)
         # print '\n'.join([str(f) for f in frames_unique_condi])
         assert ([f[0] for f in frames_unique_condi] == [1] * 30)
@@ -779,11 +782,11 @@ class TestSimulation(unittest.TestCase):
         # print(ind)
 
         assert(ind == [0] * 120 +
-                      range(1, 16) + [0] * 30 +
-                      range(1, 16) + [0] * 30 +
-                      range(1, 16) +
+                      list(range(1, 16)) + [0] * 30 +
+                      list(range(1, 16)) + [0] * 30 +
+                      list(range(1, 16)) +
                       [0] * 180)
 
 
 if __name__ == '__main__':
-    unittest.main(verbosity=2.)
+    unittest.main(verbosity=2)

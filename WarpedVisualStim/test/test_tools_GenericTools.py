@@ -1,7 +1,9 @@
 import os
 import unittest
 import numpy as np
-from ..tools import GenericTools as gt
+# from ..tools import GenericTools as gt
+
+import WarpedVisualStim.tools.GenericTools as gt
 
 curr_folder = os.path.dirname(os.path.realpath(__file__))
 os.chdir(curr_folder)

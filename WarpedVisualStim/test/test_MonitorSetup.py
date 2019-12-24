@@ -1,6 +1,8 @@
 import os
 import unittest
-from .. import MonitorSetup as ms
+# from .. import MonitorSetup as ms
+
+import WarpedVisualStim.MonitorSetup as ms
 
 curr_folder = os.path.dirname(os.path.realpath(__file__))
 os.chdir(curr_folder)

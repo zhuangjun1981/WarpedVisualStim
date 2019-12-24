@@ -6,6 +6,7 @@ interact with `StimulusRoutines` to produce visual display and log data. May als
 be used to save and export movies of experimental stimulus routines for
 presentation.
 '''
+
 from psychopy import visual, event
 import PIL
 import os
