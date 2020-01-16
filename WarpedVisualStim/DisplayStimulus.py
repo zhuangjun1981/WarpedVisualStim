@@ -657,17 +657,17 @@ class DisplaySequence(object):
         if not (os.path.isdir(directory)):
             os.makedirs(directory)
 
-        logFile = dict(self.seq_log)
+        log_dict = dict(self.seq_log)
         displayLog = dict(self.__dict__)
         displayLog.pop('seq_log')
         displayLog.pop('sequence')
-        logFile.update({'presentation': displayLog})
+        log_dict.update({'presentation': displayLog})
 
-        file_name = self.file_name + ".pkl"
+        file_name = self.file_name + ".hdf5"
 
         # generate full log dictionary
         path = os.path.join(directory, file_name)
-        ft.saveFile(path, logFile)
+        # ft.saveFile(path, logFile)
         print("\nLog file generated successfully. Log file path: ")
         print('{}'.format(path))
         if self.is_save_sequence:
@@ -681,7 +681,7 @@ class DisplaySequence(object):
             if not (os.path.isdir(backupFileFolder)):
                 os.makedirs(backupFileFolder)
             backupFilePath = os.path.join(backupFileFolder, file_name)
-            ft.saveFile(backupFilePath, logFile)
+            # ft.saveFile(backupFilePath, logFile)
 
             if self.is_save_sequence:
                 tf.imsave(os.path.join(backupFileFolder, self.file_name + '.tif'),

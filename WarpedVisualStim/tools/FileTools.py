@@ -4,6 +4,8 @@ import numpy as np
 import pickle
 import os
 import shutil
+import h5py
+import datetime
 from . import ImageAnalysis as ia
 
 try:
@@ -17,15 +19,15 @@ except ImportError as e:
     print('can not import OpenCV. \n{}'.format(e))
 
 
-def saveFile(path, data):
-    with open(path, 'wb') as f:
-        pickle.dump(data, f, protocol=2)
-
-
-def loadFile(path):
-    with open(path, 'rb') as f:
-        data = pickle.load(f, encoding='bytes')
-    return data
+# def saveFile(path, data):
+#     with open(path, 'wb') as f:
+#         pickle.dump(data, f, protocol=2)
+#
+#
+# def loadFile(path):
+#     with open(path, 'rb') as f:
+#         data = pickle.load(f, encoding='bytes')
+#     return data
 
 
 def copy(src, dest):
@@ -534,6 +536,24 @@ def int2str(num, length=None):
         raise ValueError('Length of the number is longer then defined display length!')
     elif length > len(rawstr):
         return '0' * (length - len(rawstr)) + rawstr
+
+
+class Logger(object):
+
+    def __init__(self, log_dict, save_path):
+
+        self.log_dict = log_dict
+        self.save_path = save_path
+
+    def save_log(self):
+
+        if os.path.isfile(self.save_path):
+            save_name, save_ext = os.path.splitext(self.save_path)
+            t_str = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+            self.save_path = '{}_{}{}'.format(save_name, t_str, save_ext)
+
+        log_file = h5py.File(self.save_path, 'x')
+        pass
 
 
 # ==============================  obsolete  =========================================
