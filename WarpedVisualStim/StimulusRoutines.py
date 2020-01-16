@@ -524,6 +524,7 @@ class Stim(object):
             self.postgap_dur = float(postgap_dur)
         else:
             raise ValueError('postgap_dur should be no less than 0.')
+        self.clear()
 
     def set_background(self, background):
         if background < -1. or background > 1.:
@@ -536,6 +537,7 @@ class Stim(object):
         if coordinate not in ['degree', 'linear']:
             raise ValueError('parameter "coordinate" should be either "degree" or "linear".')
         self.coordinate = coordinate
+        self.clear()
 
 
 class UniformContrast(Stim):
