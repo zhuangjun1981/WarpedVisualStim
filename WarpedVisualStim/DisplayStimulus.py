@@ -668,6 +668,9 @@ class DisplaySequence(object):
         # generate full log dictionary
         path = os.path.join(directory, file_name)
         # ft.saveFile(path, logFile)
+        logger = ft.Logger(log_dict=log_dict, save_path=path)
+        logger.save_log()
+
         print("\nLog file generated successfully. Log file path: ")
         print('{}'.format(path))
         if self.is_save_sequence:
@@ -682,6 +685,8 @@ class DisplaySequence(object):
                 os.makedirs(backupFileFolder)
             backupFilePath = os.path.join(backupFileFolder, file_name)
             # ft.saveFile(backupFilePath, logFile)
+            backup_logger = ft.Logger(log_dict=log_dict, save_path=backupFilePath)
+            backup_logger.save_log()
 
             if self.is_save_sequence:
                 tf.imsave(os.path.join(backupFileFolder, self.file_name + '.tif'),

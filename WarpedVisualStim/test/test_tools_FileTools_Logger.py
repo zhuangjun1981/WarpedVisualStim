@@ -30,6 +30,17 @@ class TestLogger(unittest.TestCase):
     def test_save_log(self):
         save_path = os.path.join(self.save_folder, 'test_log.hdf5')
         log_dict = {}
+
+        log_dict[5] = 'hello'
+        log_dict['next_dict'] = {(3, 4): [1, 2, 3],
+                                 'str_list': ['1', '2', '3']}
+        log_dict['nan'] = np.nan
+        log_dict['None'] = None
+        log_dict['bool'] = [False, True]
+
+        # print(log_dict)
+        # print(save_path)
+
         logger = gt.Logger(log_dict=log_dict, save_path=save_path)
         logger.save_log()
         logger.save_log()
@@ -40,4 +51,9 @@ class TestLogger(unittest.TestCase):
     def test_save_log_uc(self):
 
         # Initialize UniformContrast object
-        uc = stim.UniformContrast(monitor=self.mon, indicator=self.ind, duration=10., color=-1.)
+        uc = stim.UniformContrast(monitor=self.mon, indicator=self.ind, duration=1., color=-1.)
+
+        self.player.set_stim(uc)
+        self.player.trigger_display()
+
+
