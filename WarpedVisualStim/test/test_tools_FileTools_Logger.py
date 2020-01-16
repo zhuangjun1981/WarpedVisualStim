@@ -38,6 +38,8 @@ class TestLogger(unittest.TestCase):
         log_dict['None'] = None
         log_dict['bool'] = [False, True]
 
+        log_dict['third_dict'] = {'forth_dict': {'fifth_dict': {'a': 0, 0:'a'}}}
+
         # print(log_dict)
         # print(save_path)
 
