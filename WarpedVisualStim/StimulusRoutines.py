@@ -539,6 +539,19 @@ class Stim(object):
         self.coordinate = coordinate
         self.clear()
 
+    def get_indicator_range(self):
+
+        indicator_width_min = int(self.indicator.center_width_pixel
+                                  - self.indicator.width_pixel / 2)
+        indicator_width_max = int(self.indicator.center_width_pixel
+                                  + self.indicator.width_pixel / 2)
+        indicator_height_min = int(self.indicator.center_height_pixel
+                                   - self.indicator.height_pixel / 2)
+        indicator_height_max = int(self.indicator.center_height_pixel
+                                   + self.indicator.height_pixel / 2)
+        return indicator_width_min, indicator_width_max, \
+               indicator_height_min, indicator_height_max
+
 
 class UniformContrast(Stim):
     """
@@ -644,14 +657,8 @@ class UniformContrast(Stim):
                                 dtype=np.float32) * self.background
 
         # Compute pixel coordinates for indicator
-        indicator_width_min = int(self.indicator.center_width_pixel
-                                  - self.indicator.width_pixel / 2)
-        indicator_width_max = int(self.indicator.center_width_pixel
-                                  + self.indicator.width_pixel / 2)
-        indicator_height_min = int(self.indicator.center_height_pixel
-                                   - self.indicator.height_pixel / 2)
-        indicator_height_max = int(self.indicator.center_height_pixel
-                                   + self.indicator.height_pixel / 2)
+        indicator_width_min, indicator_width_max, \
+        indicator_height_max, indicator_height_min = self.get_indicator_range()
 
         display = self.color * np.ones((num_pixels_width,num_pixels_height),
                                        dtype=np.float32)
@@ -694,14 +701,8 @@ class UniformContrast(Stim):
                              self.monitor.deg_coord_x.shape[1]),
                             dtype=np.float32)
 
-        indicator_width_min = (self.indicator.center_width_pixel
-                               - self.indicator.width_pixel / 2)
-        indicator_width_max = (self.indicator.center_width_pixel
-                               + self.indicator.width_pixel / 2)
-        indicator_height_min = (self.indicator.center_height_pixel
-                                - self.indicator.height_pixel / 2)
-        indicator_height_max = (self.indicator.center_height_pixel
-                                + self.indicator.height_pixel / 2)
+        indicator_width_min, indicator_width_max, \
+        indicator_height_max, indicator_height_min = self.get_indicator_range()
 
         background = np.ones((np.size(self.monitor.deg_coord_x, 0),
                               np.size(self.monitor.deg_coord_x, 1)),
@@ -894,14 +895,8 @@ class SinusoidalLuminance(Stim):
                                 dtype=np.float32) * self.background
 
         # Compute pixel coordinates for indicator
-        indicator_width_min = (self.indicator.center_width_pixel
-                               - self.indicator.width_pixel / 2)
-        indicator_width_max = (self.indicator.center_width_pixel
-                               + self.indicator.width_pixel / 2)
-        indicator_height_min = (self.indicator.center_height_pixel
-                                - self.indicator.height_pixel / 2)
-        indicator_height_max = (self.indicator.center_height_pixel
-                                + self.indicator.height_pixel / 2)
+        indicator_width_min, indicator_width_max, \
+        indicator_height_max, indicator_height_min = self.get_indicator_range()
 
         for i, frame in enumerate(self.frames_unique):
             if frame[1] is not None:
@@ -1119,14 +1114,8 @@ class FlashingCircle(Stim):
                                                    num_pixels_height),
                                                    dtype=np.float32)
 
-        indicator_width_min = int(self.indicator.center_width_pixel
-                                  - self.indicator.width_pixel / 2)
-        indicator_width_max = int(self.indicator.center_width_pixel
-                                  + self.indicator.width_pixel / 2)
-        indicator_height_min = int(self.indicator.center_height_pixel
-                                   - self.indicator.height_pixel / 2)
-        indicator_height_max = int(self.indicator.center_height_pixel
-                                   + self.indicator.height_pixel / 2)
+        indicator_width_min, indicator_width_max, \
+        indicator_height_max, indicator_height_min = self.get_indicator_range()
 
         # background = self.background * np.ones((num_pixels_width,
         #                                         num_pixels_height),
@@ -1181,14 +1170,8 @@ class FlashingCircle(Stim):
                              self.monitor.deg_coord_x.shape[1]),
                             dtype=np.float32)
 
-        indicator_width_min = int((self.indicator.center_width_pixel -
-                                  (self.indicator.width_pixel / 2)))
-        indicator_width_max = int((self.indicator.center_width_pixel +
-                                  (self.indicator.width_pixel / 2)))
-        indicator_height_min = int((self.indicator.center_height_pixel -
-                                   (self.indicator.height_pixel / 2)))
-        indicator_height_max = int((self.indicator.center_height_pixel +
-                                   (self.indicator.height_pixel / 2)))
+        indicator_width_min, indicator_width_max, \
+        indicator_height_max, indicator_height_min = self.get_indicator_range()
 
         background = np.ones((np.size(self.monitor.deg_coord_x, 0),
                               np.size(self.monitor.deg_coord_x, 1)),
@@ -1620,14 +1603,8 @@ class SparseNoise(Stim):
                              'Should be either "linear" or "degree".'.
                              format(self.coordinate))
 
-        indicator_width_min = int(self.indicator.center_width_pixel
-                                  - self.indicator.width_pixel / 2)
-        indicator_width_max = int(self.indicator.center_width_pixel
-                                  + self.indicator.width_pixel / 2)
-        indicator_height_min = int(self.indicator.center_height_pixel
-                                   - self.indicator.height_pixel / 2)
-        indicator_height_max = int(self.indicator.center_height_pixel
-                                   + self.indicator.height_pixel / 2)
+        indicator_width_min, indicator_width_max, \
+        indicator_height_max, indicator_height_min = self.get_indicator_range()
 
         full_seq = self.background * \
                    np.ones((num_unique_frames, num_pixels_width, num_pixels_height), dtype=np.float32)
@@ -1679,14 +1656,8 @@ class SparseNoise(Stim):
                              'Should be either "linear" or "degree".'.
                              format(self.coordinate))
 
-        indicator_width_min = int(self.indicator.center_width_pixel
-                                  - self.indicator.width_pixel / 2)
-        indicator_width_max = int(self.indicator.center_width_pixel
-                                  + self.indicator.width_pixel / 2)
-        indicator_height_min = int(self.indicator.center_height_pixel
-                                   - self.indicator.height_pixel / 2)
-        indicator_height_max = int(self.indicator.center_height_pixel
-                                   + self.indicator.height_pixel / 2)
+        indicator_width_min, indicator_width_max, \
+        indicator_height_max, indicator_height_min = self.get_indicator_range()
 
         full_seq = np.ones((len(self.frames),
                             self.monitor.deg_coord_x.shape[0],
@@ -2201,14 +2172,8 @@ class LocallySparseNoise(Stim):
                              'Should be either "linear" or "degree".'.
                              format(self.coordinate))
 
-        indicator_width_min = (self.indicator.center_width_pixel
-                               - self.indicator.width_pixel / 2)
-        indicator_width_max = (self.indicator.center_width_pixel
-                               + self.indicator.width_pixel / 2)
-        indicator_height_min = (self.indicator.center_height_pixel
-                                - self.indicator.height_pixel / 2)
-        indicator_height_max = (self.indicator.center_height_pixel
-                                + self.indicator.height_pixel / 2)
+        indicator_width_min, indicator_width_max, \
+        indicator_height_max, indicator_height_min = self.get_indicator_range()
 
         full_seq = self.background * \
                    np.ones((num_unique_frames, num_pixels_width, num_pixels_height), dtype=np.float32)
@@ -2654,14 +2619,8 @@ class DriftingGratingCircle(Stim):
         else:
             raise LookupError("`coordinate` not in {'linear','degree'}")
 
-        indicator_width_min = (self.indicator.center_width_pixel
-                               - self.indicator.width_pixel / 2)
-        indicator_width_max = (self.indicator.center_width_pixel
-                               + self.indicator.width_pixel / 2)
-        indicator_height_min = (self.indicator.center_height_pixel
-                                - self.indicator.height_pixel / 2)
-        indicator_height_max = (self.indicator.center_height_pixel
-                                + self.indicator.height_pixel / 2)
+        indicator_width_min, indicator_width_max, \
+        indicator_height_max, indicator_height_min = self.get_indicator_range()
 
         mov = self.background * np.ones((num_unique_frames,
                                          num_pixels_width,
@@ -2754,14 +2713,8 @@ class DriftingGratingCircle(Stim):
         else:
             raise LookupError("`coordinate` not in {'linear','degree'}")
 
-        indicator_width_min = (self.indicator.center_width_pixel
-                               - self.indicator.width_pixel / 2)
-        indicator_width_max = (self.indicator.center_width_pixel
-                               + self.indicator.width_pixel / 2)
-        indicator_height_min = (self.indicator.center_height_pixel
-                                - self.indicator.height_pixel / 2)
-        indicator_height_max = (self.indicator.center_height_pixel
-                                + self.indicator.height_pixel / 2)
+        indicator_width_min, indicator_width_max, \
+        indicator_height_max, indicator_height_min = self.get_indicator_range()
 
         mov = np.ones((len(self.frames),
                        coord_azi.shape[0],
@@ -3071,14 +3024,8 @@ class StaticGratingCircle(Stim):
         else:
             raise LookupError("`coordinate` not in {'linear','degree'}")
 
-        indicator_width_min = (self.indicator.center_width_pixel
-                               - self.indicator.width_pixel / 2)
-        indicator_width_max = (self.indicator.center_width_pixel
-                               + self.indicator.width_pixel / 2)
-        indicator_height_min = (self.indicator.center_height_pixel
-                                - self.indicator.height_pixel / 2)
-        indicator_height_max = (self.indicator.center_height_pixel
-                                + self.indicator.height_pixel / 2)
+        indicator_width_min, indicator_width_max, \
+        indicator_height_max, indicator_height_min = self.get_indicator_range()
 
         mov = self.background * np.ones((num_unique_frames,
                                          num_pixels_width,
@@ -3486,14 +3433,8 @@ class StaticImages(Stim):
         else:
             raise LookupError("`coordinate` not in {'linear','degree'}")
 
-        indicator_width_min = (self.indicator.center_width_pixel
-                               - self.indicator.width_pixel / 2)
-        indicator_width_max = (self.indicator.center_width_pixel
-                               + self.indicator.width_pixel / 2)
-        indicator_height_min = (self.indicator.center_height_pixel
-                                - self.indicator.height_pixel / 2)
-        indicator_height_max = (self.indicator.center_height_pixel
-                                + self.indicator.height_pixel / 2)
+        indicator_width_min, indicator_width_max, \
+        indicator_height_max, indicator_height_min = self.get_indicator_range()
 
         mov = self.background * np.ones((len(self.frames_unique),
                                          self.images_wrapped.shape[1],
@@ -3615,14 +3556,8 @@ class StimulusSeparator(Stim):
         else:
             raise LookupError("`coordinate` not in {'linear','degree'}")
 
-        indicator_width_min = (self.indicator.center_width_pixel
-                               - self.indicator.width_pixel / 2)
-        indicator_width_max = (self.indicator.center_width_pixel
-                               + self.indicator.width_pixel / 2)
-        indicator_height_min = (self.indicator.center_height_pixel
-                                - self.indicator.height_pixel / 2)
-        indicator_height_max = (self.indicator.center_height_pixel
-                                + self.indicator.height_pixel / 2)
+        indicator_width_min, indicator_width_max, \
+        indicator_height_max, indicator_height_min = self.get_indicator_range()
 
         mov = self.background * np.ones((len(self.frames_unique),
                                          coord_azi.shape[0],
@@ -4106,14 +4041,8 @@ class KSstim(Stim):
                              self.monitor.deg_coord_x.shape[1]),
                             dtype=np.float32)
 
-        indicator_width_min = (self.indicator.center_width_pixel -
-                               (self.indicator.width_pixel / 2))
-        indicator_width_max = (self.indicator.center_width_pixel +
-                               (self.indicator.width_pixel / 2))
-        indicator_height_min = (self.indicator.center_height_pixel -
-                                (self.indicator.height_pixel / 2))
-        indicator_height_max = (self.indicator.center_height_pixel +
-                                (self.indicator.height_pixel / 2))
+        indicator_width_min, indicator_width_max, \
+        indicator_height_max, indicator_height_min = self.get_indicator_range()
 
         background = np.ones((np.size(self.monitor.deg_coord_x, 0),
                               np.size(self.monitor.deg_coord_x, 1)),
