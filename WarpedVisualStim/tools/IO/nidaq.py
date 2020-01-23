@@ -22,7 +22,7 @@ http://zone.ni.com/reference/en-XX/help/370471W-01/
 
 import logging
 
-# import PyDAQmx
+import PyDAQmx
 from PyDAQmx import Task
 # from PyDAQmx.DAQmxConstants import *
 import PyDAQmx.DAQmxFunctions as DAQmxFunctions
@@ -86,9 +86,9 @@ class System(object):
         return data
 
     def getNIDAQVersion(self):
-        major = self._get_property_u32(self.GetSysNIDAQMajorVersion).value
-        minor = self._get_property_u32(self.GetSysNIDAQMinorVersion).value
-        update = self._get_property_u32(self.GetSysNIDAQUpdateVersion).value
+        major = self._get_property_u32(PyDAQmx.GetSysNIDAQMajorVersion).value
+        minor = self._get_property_u32(PyDAQmx.GetSysNIDAQMinorVersion).value
+        update = self._get_property_u32(PyDAQmx.GetSysNIDAQUpdateVersion).value
         return "{}.{}.{}".format(major, minor, update)
 
 # Here we add functions to the System class
@@ -383,7 +383,7 @@ class BaseTask(Task):
             self.RegisterEveryNSamplesEvent(direction,
                                             self.buffer_size,
                                             synchronous,
-                                            DAQmxEveryNSamplesEventCallbackPtr(0),
+                                            PyDAQmx.DAQmxEveryNSamplesEventCallbackPtr(0),
                                             None)
             self.__registered = False
             logging.debug("Task sample callback unregistered.")
@@ -481,7 +481,7 @@ class AnalogInput(BaseTask):
 
         self.CreateAIVoltageChan(self.devstr, "", self.terminal_config,
                                  self.voltage_range[0], self.voltage_range[1],
-                                 DAQmx_Val_Volts, None)
+                                 PyDAQmx.DAQmx_Val_Volts, None)
 
         self.cfg_sample_clock(rate=self.clock_speed,
                               edge='rising',
@@ -528,8 +528,8 @@ class AnalogInput(BaseTask):
         try:
             read = DAQmxFunctions.int32()
             # read into the data buffer
-            self.ReadAnalogF64(self.buffer_size, self.timeout, DAQmx_Val_Auto,
-                self.data, (self.buffer_size*len(self.channels)), byref(read),
+            self.ReadAnalogF64(self.buffer_size, self.timeout, PyDAQmx.DAQmx_Val_Auto,
+                self.data, (self.buffer_size*len(self.channels)), PyDAQmx.byref(read),
                 None)
             if self.binary:
                 self.outFile.write(self.data.astype(self.dtype).tostring())
@@ -545,8 +545,8 @@ class AnalogInput(BaseTask):
         read = DAQmxFunctions.int32()
         output_size = len(self.channels)*samples
         output_array = np.zeros((len(self.channels), samples), dtype=np.float64)
-        self.ReadAnalogF64(samples, self.timeout, DAQmx_Val_GroupByScanNumber,
-                           output_array, output_size, byref(read),
+        self.ReadAnalogF64(samples, self.timeout, PyDAQmx.DAQmx_Val_GroupByScanNumber,
+                           output_array, output_size, PyDAQmx.byref(read),
                            None)
         return output_array
 
@@ -620,7 +620,7 @@ class AnalogOutput(BaseTask):
         devStr = devStr[:-1]
 
         self.CreateAOVoltageChan(devStr, "", self.voltage_range[0],
-                                 self.voltage_range[1], DAQmx_Val_Volts, None)
+                                 self.voltage_range[1], PyDAQmx.DAQmx_Val_Volts, None)
 
         #self.CfgOutputBuffer(buffer_size)
         #self.CfgSampClkTiming("",sampleRate,DAQmx_Val_Rising,DAQmx_Val_ContSamps,buffer_size) #can't get this to work at the moment
@@ -632,7 +632,7 @@ class AnalogOutput(BaseTask):
         Writes a numpy array of float64's to the analog output.
         """
         status = self.WriteAnalogF64(len(data)/len(self.channels), 0, -1,
-                                     DAQmx_Val_GroupByChannel, data, None,
+                                     PyDAQmx.DAQmx_Val_GroupByChannel, data, None,
                                      None)
         return status
 
@@ -731,11 +731,11 @@ class AnalogFunctionOutput(BaseTask):
 
         ftypes = {
             'sin': amplitude*sin(np.linspace(0,1.0/frequency,
-                buffer_size/frequency)*2.0*pi*frequency+phase)+offset,
+                int(buffer_size/frequency))*2.0*pi*frequency+phase)+offset,
             'saw': amplitude*signal.sawtooth(np.linspace(0,
-                1.0/frequency, buffer_size/frequency)*2.0*pi*frequency+phase)+offset,
+                1.0/frequency, int(buffer_size/frequency))*2.0*pi*frequency+phase)+offset,
             'sqr': amplitude*signal.square(np.linspace(0,1.0/frequency,
-                buffer_size/frequency)*2.0*pi*frequency+phase)+offset,
+                int(buffer_size/frequency))*2.0*pi*frequency+phase)+offset,
             'custom': custom_wave,
         }
 
@@ -746,17 +746,17 @@ class AnalogFunctionOutput(BaseTask):
                 self.data = np.column_stack((self.data, self.data))
 
         self.CreateAOVoltageChan(self.devstr, "", self.voltage_range[0],
-                                 self.voltage_range[1], DAQmx_Val_Volts, None)
+                                 self.voltage_range[1], PyDAQmx.DAQmx_Val_Volts, None)
 
         self.cfg_sample_clock(rate=sample_rate,
-                              edge=DAQmx_Val_Rising,
+                              edge=PyDAQmx.DAQmx_Val_Rising,
                               mode='continuous',
                               buffer_size=len(self.data),)
 
         self.AutoRegisterDoneEvent(0)
 
         status = self.WriteAnalogF64(len(self.data), 0, -1,
-                                     DAQmx_Val_GroupByScanNumber,
+                                     PyDAQmx.DAQmx_Val_GroupByScanNumber,
                                      self.data, None, None)
 
     def DoneCallback(self, status):
@@ -831,7 +831,7 @@ class DigitalInput(BaseTask):
         #print(self.devstr)
 
         #create channel
-        self.CreateDIChan(self.devstr, "", DAQmx_Val_ChanForAllLines)
+        self.CreateDIChan(self.devstr, "", PyDAQmx.DAQmx_Val_ChanForAllLines)
 
         self.data = np.zeros(self.no_lines, dtype=np.uint8)
 
@@ -853,7 +853,7 @@ class DigitalInput(BaseTask):
         """
         bytesPerSample = c_long()
         samplesPerChannel = c_long()
-        self.ReadDigitalLines(1, self.timeout, DAQmx_Val_GroupByChannel,
+        self.ReadDigitalLines(1, self.timeout, PyDAQmx.DAQmx_Val_GroupByChannel,
                               self.data, self.no_lines, samplesPerChannel,
                               bytesPerSample, None)
         return self.data
@@ -942,7 +942,7 @@ class DigitalInputU32(BaseTask):
             self.devstr = "%s/line%s" % (self.device, lines)
 
         #create channel
-        self.CreateDIChan(self.devstr, "", DAQmx_Val_ChanForAllLines)
+        self.CreateDIChan(self.devstr, "", PyDAQmx.DAQmx_Val_ChanForAllLines)
 
         #configure sampleclock
         self.cfg_sample_clock(rate=self.clock_speed,
@@ -990,8 +990,8 @@ class DigitalInputU32(BaseTask):
             a binary output file was specified.
         """
         read = DAQmxFunctions.int32()
-        self.ReadDigitalU32(self.buffer_size, self.timeout, DAQmx_Val_Auto,
-                            self.data, self.buffer_size, byref(read), None)
+        self.ReadDigitalU32(self.buffer_size, self.timeout, PyDAQmx.DAQmx_Val_Auto,
+                            self.data, self.buffer_size, PyDAQmx.byref(read), None)
         if self.binary:
             self.outFile.write(self.data.astype(np.uint32).tostring())
             self.samples_written += self.buffer_size
@@ -1092,7 +1092,7 @@ class DigitalOutput(BaseTask):
             self.devstr = str(device) + "/port" + str(port) + "/line0:" + str(self.no_lines-1)
 
         #create IO channel
-        self.CreateDOChan(self.devstr, "", DAQmx_Val_ChanForAllLines)
+        self.CreateDOChan(self.devstr, "", PyDAQmx.DAQmx_Val_ChanForAllLines)
 
         #create initial state of output lines
         if initial_state is None:
@@ -1123,7 +1123,7 @@ class DigitalOutput(BaseTask):
         no_lines = self.no_lines
         buf = np.zeros(no_lines, dtype=np.uint8)
         self.ReadDigitalLines(1, self.timeout,
-                              DAQmx_Val_GroupByChannel, buf, no_lines,
+                              PyDAQmx.DAQmx_Val_GroupByChannel, buf, no_lines,
                               samples_per_channel, bytes_per_sample,
                               None)
         return buf
@@ -1166,7 +1166,7 @@ class DigitalOutput(BaseTask):
         status = self.WriteDigitalLines(samples_per_line,
                                         autostart,
                                         self.timeout,
-                                        DAQmx_Val_GroupByChannel,
+                                        PyDAQmx.DAQmx_Val_GroupByChannel,
                                         data,
                                         None,
                                         None)
@@ -1262,7 +1262,7 @@ class DigitalOutput(BaseTask):
         '''
         self.lastOut[index] = value
         status = self.WriteDigitalLines(1, 1, self.timeout,
-                                        DAQmx_Val_GroupByChannel,
+                                        PyDAQmx.DAQmx_Val_GroupByChannel,
                                         self.lastOut, None, None)
         return status
 
@@ -1337,20 +1337,20 @@ class EventInput(BaseTask):
 
         self.devstr = "%s/line0:%i" % (self.device, bits-1)
 
-        self.CreateDIChan(self.devstr, "", DAQmx_Val_ChanForAllLines)
+        self.CreateDIChan(self.devstr, "", PyDAQmx.DAQmx_Val_ChanForAllLines)
 
         self.CfgChangeDetectionTiming(self.devstr, self.devstr,
-                                      DAQmx_Val_HWTimedSinglePoint, 1)
+                                      PyDAQmx.DAQmx_Val_HWTimedSinglePoint, 1)
         if force_synchronous_callback:
             # works but allegedly hurts performance of the thread that calls it
             # probably necessary for precision though? Talking to NI about it
             # honestly can't find a performance difference as long as I thread
             # when you use synchronous callbacks
-            options = DAQmx_Val_SynchronousEventCallbacks
+            options = PyDAQmx.DAQmx_Val_SynchronousEventCallbacks
         else:
             options = 0
 
-        self.AutoRegisterSignalEvent(DAQmx_Val_ChangeDetectionEvent, options)
+        self.AutoRegisterSignalEvent(PyDAQmx.DAQmx_Val_ChangeDetectionEvent, options)
 
         #Allow for custom buffer callbacks
         if not buffer_callback:
@@ -1426,9 +1426,9 @@ class CounterInputU32(BaseTask):
         self.devstr = "%s/%s" % (device, counter)
 
         if direction.lower() == 'up':
-            dir_val = DAQmx_Val_CountUp
+            dir_val = PyDAQmx.DAQmx_Val_CountUp
         elif direction.lower() == 'down':
-            dir_val = DAQmx_Val_CountDown
+            dir_val = PyDAQmx.DAQmx_Val_CountDown
         else:
             raise KeyError("Invalid direction.  Try 'up' or 'down'.")
 
@@ -1479,7 +1479,7 @@ class CounterInputU32(BaseTask):
 
             # read into the data buffer
             self.ReadCounterU32(self.buffer_size, self.timeout, self.data,
-                                self.buffer_size, byref(read), None)
+                                self.buffer_size, PyDAQmx.byref(read), None)
 
             #self.ReadDigitalU32(self.buffer_size, self.timeout, DAQmx_Val_Auto,
             #        self.data, self.buffer_size, byref(read), None)
@@ -1688,7 +1688,7 @@ class CounterOutputFreq(BaseTask):
 
         self.CreateCOPulseChanFreq(self.devstr,
                                    "",
-                                   DAQmx_Val_Hz,
+                                   PyDAQmx.DAQmx_Val_Hz,
                                    self.idle_state,
                                    init_delay,
                                    freq,
@@ -1699,13 +1699,13 @@ class CounterOutputFreq(BaseTask):
             # see http://zone.ni.com/reference/en-XX/help/370466W-01/mxcncpts/termnames/
             self.CfgSampClkTiming("20MHzTimebase",
                                   20000000.0,
-                                  DAQmx_Val_Rising,
-                                  DAQmx_Val_HWTimedSinglePoint,
+                                  PyDAQmx.DAQmx_Val_Rising,
+                                  PyDAQmx.DAQmx_Val_HWTimedSinglePoint,
                                   0)
         elif timing.lower() == 'sw':
             #higher buffers size for higher freq output
             #see http://zone.ni.com/reference/en-XX/help/370466V-01/mxcncpts/buffersize/
-            self.CfgImplicitTiming(DAQmx_Val_ContSamps, buffer_size)
+            self.CfgImplicitTiming(PyDAQmx.DAQmx_Val_ContSamps, buffer_size)
         else:
             raise KeyError("Timing type is not supported.  Try 'hw' or 'sw'")
 
@@ -1747,9 +1747,9 @@ class CounterInputPWM(BaseTask):
         self.timeout = timeout
 
         if self.units == 'seconds':
-            units_val = DAQmx_Val_Seconds
+            units_val = PyDAQmx.DAQmx_Val_Seconds
         elif self.units == 'timebase':
-            units_val = DAQmx_Val_Ticks
+            units_val = PyDAQmx.DAQmx_Val_Ticks
         else:
             raise KeyError("Invalid edge type.  Try 'seconds' or 'timebase'")
 
@@ -1824,13 +1824,13 @@ def get_edge_val(edge):
     """
     Gets the correct edge constant for a given input.
     """
-    if edge in [DAQmx_Val_Rising, DAQmx_Val_Falling]:
+    if edge in [PyDAQmx.DAQmx_Val_Rising, PyDAQmx.DAQmx_Val_Falling]:
         pass
     elif isinstance(edge, str):
         if edge.lower() in ["falling", 'f']:
-            edge = DAQmx_Val_Falling
+            edge = PyDAQmx.DAQmx_Val_Falling
         elif edge.lower() in ["rising", 'r']:
-            edge = DAQmx_Val_Rising
+            edge = PyDAQmx.DAQmx_Val_Rising
         else:
             raise ValueError("Only 'rising'('r') or 'falling'('f') is accepted.")
     else:
@@ -1841,17 +1841,17 @@ def get_mode_val(mode):
     """
     Gets the correct mode constant for a given input.
     """
-    if mode in [DAQmx_Val_FiniteSamps,
-                DAQmx_Val_ContSamps,
-                DAQmx_Val_HWTimedSinglePoint]:
+    if mode in [PyDAQmx.DAQmx_Val_FiniteSamps,
+                PyDAQmx.DAQmx_Val_ContSamps,
+                PyDAQmx.DAQmx_Val_HWTimedSinglePoint]:
         pass
     elif isinstance(mode, str):
         if mode.lower() in ["finite", 'f']:
-            mode = DAQmx_Val_FiniteSamps
+            mode = PyDAQmx.DAQmx_Val_FiniteSamps
         elif mode.lower() in ["continuous", 'c']:
-            mode = DAQmx_Val_ContSamps
+            mode = PyDAQmx.DAQmx_Val_ContSamps
         elif mode.lower() in ['hwtsp', 'h']:
-            mode = DAQmx_Val_HWTimedSinglePoint
+            mode = PyDAQmx.DAQmx_Val_HWTimedSinglePoint
         else:
             raise ValueError("Only 'finite'('f'), 'continuous'('c'), or 'hwtsp'('h') is accepted.")
     else:
@@ -1862,14 +1862,14 @@ def get_group_val(group):
     """
     Gets the correct grouping type for a given input.
     """
-    if group in [DAQmx_Val_GroupByChannel,
-                DAQmx_Val_GroupByScanNumber]:
+    if group in [PyDAQmx.DAQmx_Val_GroupByChannel,
+                 PyDAQmx.DAQmx_Val_GroupByScanNumber]:
         pass
     elif isinstance(group, str):
         if group.lower() in ['c', 'channel', 'chan']:
-            group = DAQmx_Val_GroupByChannel
+            group = PyDAQmx.DAQmx_Val_GroupByChannel
         elif group.lower() in ['s', 'scan', 'scannumber']:
-            group = DAQmx_Val_GroupByScanNumber
+            group = PyDAQmx.DAQmx_Val_GroupByScanNumber
         else:
             raise ValueError("Only 'channel'('c') or 'scan'('s') is accepted.")
     else:
@@ -1880,14 +1880,14 @@ def get_direction_val(direction):
     """
     Gets the correct direction type for a given input.
     """
-    if direction in [DAQmx_Val_Acquired_Into_Buffer,
-                     DAQmx_Val_Transferred_From_Buffer,]:
+    if direction in [PyDAQmx.DAQmx_Val_Acquired_Into_Buffer,
+                     PyDAQmx.DAQmx_Val_Transferred_From_Buffer,]:
         pass
     elif isinstance(direction, str):
         if direction.lower() in ['in', 'input', 'acquired', 'acq', 'i']:
-            direction = DAQmx_Val_Acquired_Into_Buffer
+            direction = PyDAQmx.DAQmx_Val_Acquired_Into_Buffer
         elif direction.lower() in ['out', 'output', 'written', 'o']:
-            direction = DAQmx_Val_Transferred_From_Buffer
+            direction = PyDAQmx.DAQmx_Val_Transferred_From_Buffer
         else:
             raise ValueError("Only 'input'('i') or 'output'('o') is accepted.")
     else:
@@ -1898,10 +1898,10 @@ def get_synchronous_val(synchronous):
     """
     Gets the correct synchronous type for a given input.
     """
-    if synchronous in [0, DAQmx_Val_SynchronousEventCallbacks]:
+    if synchronous in [0, PyDAQmx.DAQmx_Val_SynchronousEventCallbacks]:
         pass
     elif synchronous is True:
-        synchronous = DAQmx_Val_SynchronousEventCallbacks
+        synchronous = PyDAQmx.DAQmx_Val_SynchronousEventCallbacks
     elif synchronous is False:
         synchronous = 0
     else:
@@ -1912,14 +1912,14 @@ def get_elevation_val(high_or_low):
     """
     Gets the correct elevation value for a given input.
     """
-    if high_or_low in [DAQmx_Val_Low,
-                       DAQmx_Val_High,]:
+    if high_or_low in [PyDAQmx.DAQmx_Val_Low,
+                       PyDAQmx.DAQmx_Val_High,]:
         pass
     elif isinstance(high_or_low, str):
         if high_or_low.lower() in ['high', 'h']:
-            high_or_low = DAQmx_Val_High
+            high_or_low = PyDAQmx.DAQmx_Val_High
         elif high_or_low.lower() in ['low', 'l']:
-            high_or_low = DAQmx_Val_Low
+            high_or_low = PyDAQmx.DAQmx_Val_Low
         else:
             raise ValueError("Only 'high' 'h' or 'low' 'l' is accepted.")
     else:
@@ -1930,24 +1930,24 @@ def get_input_terminal_config(config):
     """
     Gets the correct config value for a given input.
     """
-    if config in [DAQmx_Val_Cfg_Default,
-                  DAQmx_Val_RSE,
-                  DAQmx_Val_NRSE,
-                  DAQmx_Val_Diff,
-                  DAQmx_Val_PseudoDiff,]:
+    if config in [PyDAQmx.DAQmx_Val_Cfg_Default,
+                  PyDAQmx.DAQmx_Val_RSE,
+                  PyDAQmx.DAQmx_Val_NRSE,
+                  PyDAQmx.DAQmx_Val_Diff,
+                  PyDAQmx.DAQmx_Val_PseudoDiff,]:
         pass
     elif isinstance(config, str):
         config = config.lower()
         if config in ['default',]:
-            config = DAQmx_Val_Cfg_Default
+            config = PyDAQmx.DAQmx_Val_Cfg_Default
         elif config in ['rse', 'r']:
-            config = DAQmx_Val_RSE
+            config = PyDAQmx.DAQmx_Val_RSE
         elif config in ['nrse', 'n']:
-            config = DAQmx_Val_NRSE
+            config = PyDAQmx.DAQmx_Val_NRSE
         elif config in ['diff', 'd']:
-            config = DAQmx_Val_Diff
+            config = PyDAQmx.DAQmx_Val_Diff
         elif config in ['pseudodiff', 'pseudo', 'p']:
-            config = DAQmx_Val_PseudoDiff
+            config = PyDAQmx.DAQmx_Val_PseudoDiff
         else:
             raise ValueError("Invalid terminal config type. Try 'rse' or 'diff'.")
     else:
