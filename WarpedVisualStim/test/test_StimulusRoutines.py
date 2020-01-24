@@ -324,9 +324,12 @@ class TestSimulation(unittest.TestCase):
                                        coordinate='degree', center=(10., 90.), sf_list=(0.02, 0.04),
                                        tf_list=(1.0,), dire_list=(45.,), con_list=(0.8,), radius_list=(20.,),
                                        block_dur=2., midgap_dur=1., iteration=2, pregap_dur=1.5,
-                                       postgap_dur=3., is_blank_block=False)
+                                       postgap_dur=3., is_blank_block=False, is_random_start_phase=False)
 
         frames = dgc.generate_frames()
+
+        # print('\n'.join([str(f) for f in frames]))
+
         assert (len(frames) == 930)
         assert ([f[0] for f in frames[0:90]] == [0] * 90)
         assert ([f[0] for f in frames[210:270]] == [0] * 60)
@@ -365,7 +368,7 @@ class TestSimulation(unittest.TestCase):
                                        coordinate='degree', center=(10., 90.), sf_list=(0.02,),
                                        tf_list=(4.0,), dire_list=(45.,), con_list=(0.8,), radius_list=(20.,),
                                        block_dur=0.5, midgap_dur=0.1, iteration=2, pregap_dur=0.2,
-                                       postgap_dur=0.3, is_blank_block=True)
+                                       postgap_dur=0.3, is_blank_block=True, is_random_start_phase=False)
 
         frames = dgc.generate_frames()
         # print('\n'.join([str(f) for f in frames]))
@@ -398,15 +401,18 @@ class TestSimulation(unittest.TestCase):
                                        block_dur=2., sf_list=(0.04,), tf_list=(2.0,),
                                        dire_list=(45.,), con_list=(0.8,), radius_list=(10.,),
                                        midgap_dur=0.1, pregap_dur=0.5, postgap_dur=0.2,
-                                       iteration=2, is_blank_block=False)
+                                       iteration=2, is_blank_block=False, is_random_start_phase=False)
 
         conditions = dgc._generate_all_conditions()
         # print len(conditions)
         assert (len(conditions) == 1)
+
         frames_unique_condi, index_to_display_condi = dgc._generate_frames_for_index_display_condition(conditions[0])
         assert (index_to_display_condi == list(range(30)) * 4)
         assert (max(index_to_display_condi) == len(frames_unique_condi) - 1)
-        # print '\n'.join([str(f) for f in frames_unique_condi])
+
+        print('\n'.join([str(f) for f in frames_unique_condi]))
+
         assert ([f[0] for f in frames_unique_condi] == [1] * 30)
         assert (frames_unique_condi[0][1] == 1)
         assert (frames_unique_condi[0][8] == 1.)
@@ -418,34 +424,80 @@ class TestSimulation(unittest.TestCase):
                                        block_dur=2., sf_list=(0.04,), tf_list=(1., 3.0,),
                                        dire_list=(45., 90.), con_list=(0.8,), radius_list=(10.,),
                                        midgap_dur=0.1, pregap_dur=0.5, postgap_dur=0.2,
-                                       iteration=2, is_blank_block=False)
+                                       iteration=2, is_blank_block=False, is_random_start_phase=False)
         frames_unique, condi_ind_in_frames_unique = dgc._generate_frames_unique_and_condi_ind_dict()
         assert (len(condi_ind_in_frames_unique) == 4)
         assert (set(condi_ind_in_frames_unique.keys()) == {'condi_0000', 'condi_0001', 'condi_0002', 'condi_0003'})
         assert (len(frames_unique) == 161)
+
         for frame in frames_unique:
             assert (len(frame) == 9)
+
+        # for frame_i, frame in enumerate(frames_unique):
+        #     print('{}: {}'.format(frame_i, frame))
 
         import numpy as np
         for cond, ind in condi_ind_in_frames_unique.items():
             assert (len(ind) == 120)
             assert (ind[0] % 20 == 1)
             assert (len(np.unique(ind)) == 60 or len(np.unique(ind)) == 20)
-            # print '\ncond'
-            # print ind
+
+            # print('{}: {}'.format(cond, ind))
 
     def test_DGC_generate_display_index(self):
         dgc = sr.DriftingGratingCircle(monitor=self.monitor, indicator=self.indicator,
                                        block_dur=2., sf_list=(0.04,), tf_list=(1., 3.0,),
                                        dire_list=(45., 90.), con_list=(0.8,), radius_list=(10.,),
                                        midgap_dur=0.1, pregap_dur=0.5, postgap_dur=0.2,
-                                       iteration=2, is_blank_block=False)
+                                       iteration=2, is_blank_block=False, is_random_start_phase=False)
         frames_unique, index_to_display = dgc._generate_display_index()
         # print '\n'.join([str(f) for f in frames_unique])
         assert (len(frames_unique) == 161)
         assert (max(index_to_display) == len(frames_unique) - 1)
         # print len(index_to_display)
         assert (len(index_to_display) == 1044)
+
+    def test_DGC_random_start_phase(self):
+
+        dgc = sr.DriftingGratingCircle(monitor=self.monitor, indicator=self.indicator,
+                                       block_dur=0.25, sf_list=(0.04,), tf_list=(1., 0.5),
+                                       dire_list=(90.,), con_list=(0.8,), radius_list=(10.,),
+                                       midgap_dur=0.1, pregap_dur=0.2, postgap_dur=0.3,
+                                       iteration=2, is_blank_block=True, is_random_start_phase=True)
+
+        frames_unique, index_to_display = dgc._generate_display_index()
+
+        frames = [frames_unique[i] for i in index_to_display]
+
+        # assert(len(frames) == 150)
+
+        for frame_i, frame in enumerate(frames):
+            print('{}: {}'.format(frame_i, frame))
+
+            if frame_i < 12 or 26 < frame_i < 33 or 47 < frame_i < 54 or 68 < frame_i < 75 or 89 < frame_i < 96 \
+                    or 110 < frame_i < 117 or frame_i > 131:
+                assert(frame == (0.0, None, None, None, None, None, None, None, -1.0))
+
+    def test_DGC_random_start_phase2(self):
+
+        dgc = sr.DriftingGratingCircle(monitor=self.monitor, indicator=self.indicator,
+                                       block_dur=0.25, sf_list=(0.04,), tf_list=(10., 0.5),
+                                       dire_list=(90.,), con_list=(0.8,), radius_list=(10.,),
+                                       midgap_dur=0.1, pregap_dur=0.2, postgap_dur=0.3,
+                                       iteration=2, is_blank_block=True, is_random_start_phase=True)
+
+        frames_unique, index_to_display = dgc._generate_display_index()
+
+        frames = [frames_unique[i] for i in index_to_display]
+
+        # assert (len(frames) == 150)
+
+        for frame_i, frame in enumerate(frames):
+            print('{}: {}'.format(frame_i, frame))
+
+            if frame_i < 12 or 26 < frame_i < 33 or 47 < frame_i < 54 or 68 < frame_i < 75 or 89 < frame_i < 96 \
+                    or 110 < frame_i < 117 or frame_i > 131:
+                assert(frame == (0.0, None, None, None, None, None, None, None, -1.0))
 
     def test_LSN_generate_all_probes(self):
         lsn = sr.LocallySparseNoise(monitor=self.monitor, indicator=self.indicator,
@@ -698,8 +750,8 @@ class TestSimulation(unittest.TestCase):
         assert (img_w_f['images_wrapped/altitude'].shape == (120, 160))
         assert (img_w_f['images_wrapped/azimuth'].shape == (120, 160))
         import numpy as np
-        assert (np.array_equal(img_w_f['images_wrapped/altitude'].value, self.monitor.deg_coord_y))
-        assert (np.array_equal(img_w_f['images_wrapped/azimuth'].value, self.monitor.deg_coord_x))
+        assert (np.array_equal(img_w_f['images_wrapped/altitude'][()], self.monitor.deg_coord_y))
+        assert (np.array_equal(img_w_f['images_wrapped/azimuth'][()], self.monitor.deg_coord_x))
 
         assert (img_w_f['images_dewrapped/images'].shape == (2, 270, 473))
         assert (img_w_f['images_dewrapped/altitude'].shape == (270, 473))
@@ -789,4 +841,4 @@ class TestSimulation(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main(verbosity=2)
+    unittest.main(verbosity=0)

@@ -2272,13 +2272,17 @@ class DriftingGratingCircle(Stim):
         will be displayed for each iteration. The frames of this condition will be:
         (1, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0), the meaning of these numbers can be found in
         self.frame_config
+    is_random_start_phase : bool
+        if True, the starting phase of each block will be randomized
+        if False, the starting phase of each block will be 0 degree
     """
 
     def __init__(self, monitor, indicator, background=0., coordinate='degree',
                  center=(0., 60.), sf_list=(0.08,), tf_list=(4.,), dire_list=(0.,),
                  con_list=(0.5,), radius_list=(10.,), block_dur=2., midgap_dur=0.5,
                  iteration=1, pregap_dur=2., postgap_dur=3., is_smooth_edge=False,
-                 smooth_width_ratio=0.2, smooth_func=blur_cos, is_blank_block=True):
+                 smooth_width_ratio=0.2, smooth_func=blur_cos, is_blank_block=True,
+                 is_random_start_phase=False):
         """
         Initialize `DriftingGratingCircle` stimulus object, inherits Parameters
         from `Stim` class
@@ -2304,6 +2308,7 @@ class DriftingGratingCircle(Stim):
         self.is_smooth_edge = is_smooth_edge
         self.smooth_width_ratio = smooth_width_ratio
         self.smooth_func = smooth_func
+        self.is_random_start_phase = is_random_start_phase
 
         if int(block_dur * self.monitor.refresh_rate) >= 4:
             self.block_dur = float(block_dur)
@@ -2324,11 +2329,17 @@ class DriftingGratingCircle(Stim):
         self.is_blank_block = bool(is_blank_block)
 
         for tf in tf_list:
-            period = 1. / tf
-            if (0.05 * period) < (block_dur % period) < (0.95 * period):
-                error_msg = ('Duration of each block times tf ' + str(tf)
-                             + ' should be close to a whole number!')
-                raise ValueError(error_msg)
+
+            if block_dur * tf < 1.:
+                print('Caution: the block_dur ({} second) is not long enough for displaying'
+                      'a full cycle of temporal frequency {} Hz'.format(block_dur, tf))
+
+            # period = 1. / tf
+            #
+            # if (0.05 * period) < (block_dur % period) < (0.95 * period):
+            #     error_msg = ('Duration of each block times tf ' + str(tf)
+            #                  + ' should be close to a whole number!')
+            #     raise ValueError(error_msg)
 
     @property
     def midgap_frame_num(self):
@@ -2388,6 +2399,10 @@ class DriftingGratingCircle(Stim):
             frame_per_cycle = int(self.monitor.refresh_rate / tf)
 
             phases_per_cycle = list(np.arange(0, np.pi * 2, np.pi * 2 / frame_per_cycle))
+
+            if self.is_random_start_phase:
+                start_ind = np.random.randint(low=len(phases_per_cycle), size=1)[0]
+                phases_per_cycle = phases_per_cycle[start_ind:] + phases_per_cycle[:start_ind]
 
             phases = []
 
@@ -2538,6 +2553,7 @@ class DriftingGratingCircle(Stim):
                     }
         """
         if self.indicator.is_sync:
+
             all_conditions = self._generate_all_conditions()
 
             '''
@@ -2552,6 +2568,7 @@ class DriftingGratingCircle(Stim):
                      }
                 }
             '''
+
             condi_dict = {}
             for i, condi in enumerate(all_conditions):
                 frames_unique_condi, index_to_display_condi = self._generate_frames_for_index_display_condition(condi)
@@ -2583,21 +2600,45 @@ class DriftingGratingCircle(Stim):
     def _generate_display_index(self):
         """ compute a list of indices corresponding to each frame to display. """
 
-        frames_unique, condi_ind_in_frames_unique = self._generate_frames_unique_and_condi_ind_dict()
-
-        condi_keys = list(condi_ind_in_frames_unique.keys())
-
         index_to_display = []
         index_to_display += [0] * self.pregap_frame_num
 
-        for iter in range(self.iteration):
-            np.random.shuffle(condi_keys)
-            for condi_ind, condi in enumerate(condi_keys):
-                if iter == 0 and condi_ind == 0:
-                    pass
-                else:
-                    index_to_display += [0] * self.midgap_frame_num
-                index_to_display += condi_ind_in_frames_unique[condi]
+        if self.is_random_start_phase:
+
+            frames_unique = []
+
+            for iter in range(self.iteration):
+
+                frames_unique_iter, condi_ind_in_frames_unique = self._generate_frames_unique_and_condi_ind_dict()
+                condi_keys = list(condi_ind_in_frames_unique.keys())
+                np.random.shuffle(condi_keys)
+
+                for condi_ind, condi in enumerate(condi_keys):
+
+                    # add gap frames
+                    if iter == 0 and condi_ind == 0:
+                        pass
+                    else:
+                        index_to_display += [0] * self.midgap_frame_num
+
+                    existing_frame_num = len(frames_unique)
+                    index_to_display += [existing_frame_num + ind for ind in condi_ind_in_frames_unique[condi]]
+                    frames_unique += frames_unique_iter
+
+        else:
+            frames_unique, condi_ind_in_frames_unique = self._generate_frames_unique_and_condi_ind_dict()
+            condi_keys = list(condi_ind_in_frames_unique.keys())
+
+            for iter in range(self.iteration):
+                np.random.shuffle(condi_keys)
+                for condi_ind, condi in enumerate(condi_keys):
+
+                    # add gap frames
+                    if iter == 0 and condi_ind == 0:
+                        pass
+                    else:
+                        index_to_display += [0] * self.midgap_frame_num
+                    index_to_display += condi_ind_in_frames_unique[condi]
 
         index_to_display += [0] * self.postgap_frame_num
 
@@ -3223,7 +3264,7 @@ class StaticImages(Stim):
                                                     deg_per_pixel=deg_per_pixel,
                                                     is_luminance_correction=True)
         imgs_w, alt_w, azi_w, imgs_dw, alt_dw, azi_dw = wrapping_results
-        results_f = h5py.File(os.path.join(work_dir, 'wrapped_images_for_display.hdf5'))
+        results_f = h5py.File(os.path.join(work_dir, 'wrapped_images_for_display.hdf5'), 'a')
         grp_w = results_f.create_group('images_wrapped')
         _ = grp_w.create_dataset('images', data=imgs_w)
         _ = grp_w.create_dataset('altitude', data=alt_w)

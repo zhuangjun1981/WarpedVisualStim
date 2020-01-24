@@ -16,7 +16,7 @@ dgc = stim.DriftingGratingCircle(monitor=mon, indicator=ind, background=0.,
                                  coordinate='degree', center=(10., 90.), sf_list=(0.02,),
                                  tf_list=(4.0, 2.0), dire_list=(45.,), con_list=(0.8,), radius_list=(20.,),
                                  block_dur=2., midgap_dur=1., iteration=3, pregap_dur=2.,
-                                 postgap_dur=3., is_blank_block=True)
+                                 postgap_dur=3., is_blank_block=True, is_random_start_phase=False)
 ds.set_stim(dgc)
 ds.trigger_display()
 plt.show()

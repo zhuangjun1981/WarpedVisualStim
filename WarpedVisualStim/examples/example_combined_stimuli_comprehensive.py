@@ -127,6 +127,7 @@ dgc_is_smooth_edge = True
 dgc_smooth_width_ratio = 0.2
 dgc_smooth_func = stim.blur_cos
 dgc_is_blank_block = True
+dgc_is_random_start_phase = False
 # =================================================================================
 
 # ============================ StaticGratingCirlce ================================
@@ -255,7 +256,8 @@ dgc = stim.DriftingGratingCircle(monitor=mon, indicator=ind, pregap_dur=pregap_d
                                  midgap_dur=dgc_midgap_dur, iteration=dgc_iteration,
                                  is_smooth_edge=dgc_is_smooth_edge,
                                  smooth_width_ratio=dgc_smooth_width_ratio,
-                                 smooth_func=dgc_smooth_func, is_blank_block=dgc_is_blank_block)
+                                 smooth_func=dgc_smooth_func, is_blank_block=dgc_is_blank_block,
+                                 is_random_start_phase=dgc_is_random_start_phase)
 # =================================================================================
 
 # ======================= Static Grating Cricle ===================================
