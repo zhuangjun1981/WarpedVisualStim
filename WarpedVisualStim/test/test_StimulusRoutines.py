@@ -1,5 +1,7 @@
 import os
 import unittest
+import numpy as np
+import itertools
 # from .. import MonitorSetup as ms
 # from .. import StimulusRoutines as sr
 
@@ -25,7 +27,6 @@ class TestSimulation(unittest.TestCase):
         self.curr_folder = os.path.dirname(os.path.realpath(__file__))
 
     def test_blur_cos(self):
-        import numpy as np
         dis = np.arange(10, 30, 0.1) - 20.
         sigma = 10.
         blurred = sr.blur_cos(dis=dis, sigma=sigma)
@@ -50,7 +51,6 @@ class TestSimulation(unittest.TestCase):
         assert (mask[39, 100] - 0.404847 < 1E10)
 
     def test_get_circle_mask2(self):
-        import numpy as np
 
         alt = np.arange(-30., 30., 1.)[::-1]
         azi = np.arange(-30., 30., 1.)
@@ -69,8 +69,6 @@ class TestSimulation(unittest.TestCase):
         assert (cm[10, 30] == 1)
 
     def test_get_warped_probes(self):
-
-        import numpy as np
         azis = np.arange(0, 10, 0.1)
         alts = np.arange(30, 40, 0.1)[::-1]
         coord_azi, coord_alt = np.meshgrid(azis, alts)
@@ -92,7 +90,6 @@ class TestSimulation(unittest.TestCase):
         assert (frame[81, 53] == 1)
 
     def test_get_grating(self):
-        import numpy as np
 
         alt = np.arange(-30., 30., 1.)[::-1]
         azi = np.arange(-30., 30., 1.)
@@ -257,7 +254,6 @@ class TestSimulation(unittest.TestCase):
             assert (index_to_display[9 + probe_ind * 6] - index_to_display[8 + probe_ind * 6] == 1)
 
     def test_SN_get_probe_index_for_one_iter_on_off(self):
-        import numpy as np
         sn = sr.SparseNoise(monitor=self.monitor, indicator=self.indicator,
                             background=0., coordinate='degree', grid_space=(5., 5.),
                             probe_size=(5., 5.), probe_orientation=0., probe_frame_num=6,
@@ -270,7 +266,6 @@ class TestSimulation(unittest.TestCase):
             assert(not np.array_equal(probe_loc_0, probe_loc_1))
 
     def test_SN_generate_display_index2(self):
-        import numpy as np
         sn = sr.SparseNoise(monitor=self.monitor, indicator=self.indicator,
                             background=0., coordinate='degree', grid_space=(10., 10.),
                             probe_size=(10., 10.), probe_orientation=0., probe_frame_num=8,
@@ -300,7 +295,6 @@ class TestSimulation(unittest.TestCase):
                             subregion=[-20., -10., 30., 90.], sign='ON', iteration=1, pregap_dur=0.1,
                             postgap_dur=0.2, is_include_edge=True)
         mov_unique, _ = sn.generate_movie_by_index()
-        import numpy as np
         # import matplotlib.pyplot as plt
         # plt.imshow(np.max(mov_unique, axis=0))
         # plt.show()
@@ -313,7 +307,6 @@ class TestSimulation(unittest.TestCase):
                             subregion=[-20., -10., 30., 90.], sign='OFF', iteration=1, pregap_dur=0.1,
                             postgap_dur=0.2, is_include_edge=True)
         mov, _ = sn.generate_movie()
-        import numpy as np
         import matplotlib.pyplot as plt
         # plt.imshow(np.min(mov, axis=0))
         # plt.show()
@@ -436,7 +429,6 @@ class TestSimulation(unittest.TestCase):
         # for frame_i, frame in enumerate(frames_unique):
         #     print('{}: {}'.format(frame_i, frame))
 
-        import numpy as np
         for cond, ind in condi_ind_in_frames_unique.items():
             assert (len(ind) == 120)
             assert (ind[0] % 20 == 1)
@@ -527,8 +519,6 @@ class TestSimulation(unittest.TestCase):
         all_probes = lsn._generate_all_probes()
         probes_one_frame, all_probes_left = lsn._generate_probe_locs_one_frame(all_probes)
 
-        import itertools
-        import numpy as np
         for (p0, p1) in itertools.combinations(probes_one_frame, r=2):
             curr_dis = np.sqrt((p0[0] - p1[0]) ** 2 + (p0[1] - p1[1]) **2)
             # print (p0, p1), curr_dis
@@ -548,8 +538,6 @@ class TestSimulation(unittest.TestCase):
         # print [len(f) for f in frames]
         assert (sum([len(f) for f in frames]) == len(all_probes))
 
-        import itertools
-        import numpy as np
         alt_lst = np.arange(-10., 25., 10)
         azi_lst = np.arange(0., 65., 10)
         all_probes = list(itertools.product(alt_lst, azi_lst, [-1., 1.]))
@@ -588,8 +576,6 @@ class TestSimulation(unittest.TestCase):
         # print [len(f) for f in frames]
         assert (sum([len(f) for f in frames]) == len(all_probes))
 
-        import itertools
-        import numpy as np
         alt_lst = np.arange(-10., 25., 10)
         azi_lst = np.arange(0., 65., 10)
         all_probes = list(itertools.product(alt_lst, azi_lst, [-1., 1.]))
@@ -643,8 +629,6 @@ class TestSimulation(unittest.TestCase):
                                     sign='ON-OFF', iteration=1, pregap_dur=2., postgap_dur=3.,
                                     is_include_edge=True, repeat=3)
 
-        import itertools
-        import numpy as np
         alt_lst = np.arange(-10., 25., 10)
         azi_lst = np.arange(0., 65., 10)
         all_probes = list(itertools.product(alt_lst, azi_lst, [-1., 1.]))
@@ -749,7 +733,6 @@ class TestSimulation(unittest.TestCase):
         assert (img_w_f['images_wrapped/images'].shape == (2, 120, 160))
         assert (img_w_f['images_wrapped/altitude'].shape == (120, 160))
         assert (img_w_f['images_wrapped/azimuth'].shape == (120, 160))
-        import numpy as np
         assert (np.array_equal(img_w_f['images_wrapped/altitude'][()], self.monitor.deg_coord_y))
         assert (np.array_equal(img_w_f['images_wrapped/azimuth'][()], self.monitor.deg_coord_x))
 
@@ -766,7 +749,6 @@ class TestSimulation(unittest.TestCase):
                              coordinate='degree', img_center=(0., 60.), deg_per_pixel=(0.1, 0.1),
                              display_dur=0.25, midgap_dur=0., iteration=1, pregap_dur=2.,
                              postgap_dur=3., is_blank_block=False)
-        import numpy as np
         si.images_wrapped = np.random.rand(27, 120, 160)
         frames_unique = si._generate_frames_for_index_display()
         assert (len(frames_unique) == 55)
@@ -778,7 +760,6 @@ class TestSimulation(unittest.TestCase):
                              coordinate='degree', img_center=(0., 60.), deg_per_pixel=(0.1, 0.1),
                              display_dur=0.25, midgap_dur=0.1, iteration=2, pregap_dur=2.,
                              postgap_dur=3., is_blank_block=False)
-        import numpy as np
         si.images_wrapped = np.random.rand(15, 120, 160)
         frames_unique, index_to_display = si._generate_display_index()
         assert (len(index_to_display) == 924)
@@ -790,7 +771,6 @@ class TestSimulation(unittest.TestCase):
                              coordinate='degree', img_center=(0., 60.), deg_per_pixel=(0.1, 0.1),
                              display_dur=0.1, midgap_dur=0.1, iteration=1, pregap_dur=0.,
                              postgap_dur=0., is_blank_block=True)
-        import numpy as np
         si.images_wrapped = np.random.rand(2, 120, 160)
         frames_unique, index_to_display = si._generate_display_index()
         assert (len(frames_unique) == 7)
