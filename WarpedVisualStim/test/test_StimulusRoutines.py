@@ -469,10 +469,10 @@ class TestSimulation(unittest.TestCase):
 
         frames = [frames_unique[i] for i in index_to_display]
 
-        # assert(len(frames) == 150)
+        assert(len(frames) == 150)
 
         for frame_i, frame in enumerate(frames):
-            print('{}: {}'.format(frame_i, frame))
+        #     print('{}: {}'.format(frame_i, frame))
 
             if frame_i < 12 or 26 < frame_i < 33 or 47 < frame_i < 54 or 68 < frame_i < 75 or 89 < frame_i < 96 \
                     or 110 < frame_i < 117 or frame_i > 131:
@@ -490,10 +490,10 @@ class TestSimulation(unittest.TestCase):
 
         frames = [frames_unique[i] for i in index_to_display]
 
-        # assert (len(frames) == 150)
+        assert (len(frames) == 150)
 
         for frame_i, frame in enumerate(frames):
-            print('{}: {}'.format(frame_i, frame))
+            # print('{}: {}'.format(frame_i, frame))
 
             if frame_i < 12 or 26 < frame_i < 33 or 47 < frame_i < 54 or 68 < frame_i < 75 or 89 < frame_i < 96 \
                     or 110 < frame_i < 117 or frame_i > 131:

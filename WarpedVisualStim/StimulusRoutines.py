@@ -2623,7 +2623,8 @@ class DriftingGratingCircle(Stim):
 
                     existing_frame_num = len(frames_unique)
                     index_to_display += [existing_frame_num + ind for ind in condi_ind_in_frames_unique[condi]]
-                    frames_unique += frames_unique_iter
+
+                frames_unique += frames_unique_iter
 
         else:
             frames_unique, condi_ind_in_frames_unique = self._generate_frames_unique_and_condi_ind_dict()
