@@ -122,304 +122,341 @@ def batchCopy(pathList, destinationFolder, isDelete=False):
     return unCopied
 
 
-def importRawJCam(path,
-                  dtype=np.dtype('>f'),
-                  headerLength=96,  # length of the header, measured as the data type defined above
-                  columnNumIndex=14,  # index of number of rows in header
-                  rowNumIndex=15,  # index of number of columns in header
-                  frameNumIndex=16,  # index of number of frames in header
-                  decimation=None,  # decimation number
-                  exposureTimeIndex=17):  # index of exposure time in header, exposure time is measured in ms
-    """
-    import raw JCam files into np.array
-
-
-        raw file format:
-        data type: 32 bit sigle precision floating point number
-        data format: big-endian single-precision float, high-byte-first motorola
-        header length: 96 floating point number
-        column number index: 14
-        row number index: 15
-        frame number index: 16
-        exposure time index: 17
-    """
-    imageFile = np.fromfile(path, dtype=dtype, count=-1)
-
-    columnNum = np.int(imageFile[columnNumIndex])
-    rowNum = np.int(imageFile[rowNumIndex])
-
-    if decimation is not None:
-        columnNum /= decimation
-        rowNum /= decimation
-
-    frameNum = np.int(imageFile[frameNumIndex])
-
-    if frameNum == 0:  # if it is a single frame image
-        frameNum += 1
-
-    exposureTime = np.float(imageFile[exposureTimeIndex])
-
-    imageFile = imageFile[headerLength:]
-
-    print('width =', str(columnNum), 'pixels')
-    print('height =', str(rowNum), 'pixels')
-    print('length =', str(frameNum), 'frame(s)')
-    print('exposure time =', str(exposureTime), 'ms')
-
-    imageFile = imageFile.reshape((frameNum, rowNum, columnNum))
-
-    return imageFile, exposureTime
-
-
-def readBinaryFile(path,
-                   position,
-                   count=1,
-                   dtype=np.dtype('>f'),
-                   whence=os.SEEK_SET):
-    """
-    read arbitary part of a binary file,
-    data type defined by dtype,
-    start position defined by position (counts accordinating to dtype)
-    length defined by count.
-    """
-
-    f = open(path, 'rb')
-    f.seek(position * dtype.alignment, whence)
-    data = np.fromfile(f, dtype=dtype, count=count)
-    f.close()
-    return data
-
-
-def readBinaryFile2(f,
-                    position,
-                    count=1,
-                    dtype=np.dtype('>f'),
-                    whence=os.SEEK_SET):
-    """
-    similar as readBinaryFile but without opening and closing file object
-    """
-    f.seek((position * dtype.alignment), whence)
-    data = np.fromfile(f, dtype=dtype, count=count)
-    return data
-
-
-def importRawJPhys(path,
-                   dtype=np.dtype('>f'),
-                   headerLength=96,  # length of the header for each channel
-                   channels=('photodiode2', 'read', 'trigger', 'photodiode'),  # name of all channels
-                   sf=10000):  # sampling rate, Hz
-    """
-    import raw JPhys files into np.array
-    one dictionary contains header for each channel
-    the other contains values for each for each channel
-    """
-
-    JPhysFile = np.fromfile(path, dtype=dtype, count=-1)
-    channelNum = len(channels)
-
-    channelLength = len(JPhysFile) / channelNum
-
-    if len(JPhysFile) % channelNum != 0:
-        raise ArithmeticError('Length of the file should be divisible by channel number!')
-
-    header = {}
-    body = {}
-
-    for index, channelname in enumerate(channels):
-        channelStart = index * channelLength
-        channelEnd = channelStart + channelLength
-
-        header.update({channels[index]: JPhysFile[channelStart:channelStart + headerLength]})
-        body.update({channels[index]: JPhysFile[channelStart + headerLength:channelEnd]})
-
-    body.update({'samplingRate': sf})
-
-    return header, body
-
-
-def importRawNewJPhys(path,
-                      dtype=np.dtype('>f'),
-                      headerLength=96,  # length of the header for each channel
-                      channels=('photodiode2',
-                                'read',
-                                'trigger',
-                                'photodiode',
-                                'sweep',
-                                'visualFrame',
-                                'runningRef',
-                                'runningSig',
-                                'reward',
-                                'licking'),  # name of all channels
-                      sf=10000):  # sampling rate, Hz
-    """
-    import new style raw JPhys files into np.array
-    one dictionary contains header for each channel
-    the other contains values for each for each channel
-    """
-
-    JPhysFile = np.fromfile(path, dtype=dtype, count=-1)
-    channelNum = len(channels)
-
-    channelLength = len(JPhysFile) / channelNum
-    #    print 'length of JPhys:', len(JPhysFile)
-    #    print 'length of JPhys channel number:', channelNum
-
-    if len(JPhysFile) % channelNum != 0:
-        raise ArithmeticError('Length of the file should be divisible by channel number!')
-
-    JPhysFile = JPhysFile.reshape([channelLength, channelNum])
-
-    headerMatrix = JPhysFile[0:headerLength, :]
-    bodyMatrix = JPhysFile[headerLength:, :]
-
-    header = {}
-    body = {}
-
-    for index, channelname in enumerate(channels):
-        header.update({channels[index]: headerMatrix[:, index]})
-        body.update({channels[index]: bodyMatrix[:, index]})
-
-    body.update({'samplingRate': sf})
-
-    return header, body
-
-
-def importRawJPhys2(path,
-                    imageFrameNum,
-                    photodiodeThr=.95,  # threshold of photo diode signal,
-                    dtype=np.dtype('>f'),
-                    headerLength=96,  # length of the header for each channel
-                    channels=('photodiode2', 'read', 'trigger', 'photodiode'),  # name of all channels
-                    sf=10000.):  # sampling rate, Hz
-    """
-    extract important information from JPhys file
-    """
-
-    JPhysFile = np.fromfile(path, dtype=dtype, count=-1)
-    channelNum = len(channels)
-
-    channelLength = len(JPhysFile) / channelNum
-
-    if channelLength % 1 != 0:
-        raise ArithmeticError('Bytes in each channel should be integer !')
-
-    channelLength = int(channelLength)
-
-    # get trace for each channel
-    for index, channelname in enumerate(channels):
-        channelStart = index * channelLength
-        channelEnd = channelStart + channelLength
-        #        if channelname == 'expose':
-        #            expose = JPhysFile[channelStart+headerLength:channelEnd]
-
-        if channelname == 'read':
-            read = JPhysFile[channelStart + headerLength:channelEnd]
-
-        if channelname == 'photodiode':
-            photodiode = JPhysFile[channelStart + headerLength:channelEnd]
-
-        #        if channelname == 'trigger':
-        #            trigger = JPhysFile[channelStart+headerLength:channelEnd]
-
-    # generate time stamp for each image frame
-    imageFrameTS = []
-    for i in range(1, len(read)):
-        if read[i - 1] < 3.0 and read[i] >= 3.0:
-            imageFrameTS.append(i * (1. / sf))
-
-    if len(imageFrameTS) < imageFrameNum:
-        raise LookupError("Expose period number is smaller than image frame number!")
-    imageFrameTS = imageFrameTS[0:imageFrameNum]
-
-    # first time of visual stimulation
-    visualStart = None
-
-    for i in range(80, len(photodiode)):
-        if ((photodiode[i] - photodiodeThr) * (photodiode[i - 1] - photodiodeThr)) < 0 and \
-                        ((photodiode[i] - photodiodeThr) * (
-                            photodiode[i - 75] - photodiodeThr)) < 0:  # first frame of big change
-            visualStart = i * (1. / sf)
-            break
-
-    return np.array(imageFrameTS), visualStart
-
-
-def importRawNewJPhys2(path,
-                       imageFrameNum,
-                       photodiodeThr=.95,  # threshold of photo diode signal,
-                       dtype=np.dtype('>f'),
-                       headerLength=96,  # length of the header for each channel
-                       channels=('photodiode2',
-                                 'read',
-                                 'trigger',
-                                 'photodiode',
-                                 'sweep',
-                                 'visualFrame',
-                                 'runningRef',
-                                 'runningSig',
-                                 'reward',
-                                 'licking'),  # name of all channels
-                       sf=10000.):  # sampling rate, Hz
-    """
-    extract important information from new style JPhys file
-    """
-
-    JPhysFile = np.fromfile(path, dtype=dtype, count=-1)
-    channelNum = len(channels)
-
-    channelLength = len(JPhysFile) / channelNum
-
-    if len(JPhysFile) % channelNum != 0:
-        raise ArithmeticError('Length of the file should be divisible by channel number!')
-
-    JPhysFile = JPhysFile.reshape([channelLength, channelNum])
-
-    bodyMatrix = JPhysFile[headerLength:, :]
-
-    # get trace for each channel
-    for index, channelname in enumerate(channels):
-
-        if channelname == 'read':
-            read = bodyMatrix[:, index]
-
-        if channelname == 'photodiode':
-            photodiode = bodyMatrix[:, index]
-
-        #        if channelname == 'trigger':
-        #            trigger = JPhysFile[channelStart+headerLength:channelEnd]
-
-    # generate time stamp for each image frame
-    imageFrameTS = []
-    for i in range(1, len(read)):
-        if (read[i - 1] < 3.0) and (read[i] >= 3.0):
-            imageFrameTS.append(i * (1. / sf))
-
-    if len(imageFrameTS) < imageFrameNum:
-        raise LookupError("Expose period number is smaller than image frame number!")
-    imageFrameTS = imageFrameTS[0:imageFrameNum]
-
-    # first time of visual stimulation
-    visualStart = None
-
-    for i in range(80, len(photodiode)):
-        if ((photodiode[i] - photodiodeThr) * (photodiode[i - 1] - photodiodeThr)) < 0 and \
-                        ((photodiode[i] - photodiodeThr) * (
-                            photodiode[i - 75] - photodiodeThr)) < 0:  # first frame of big change
-            visualStart = i * (1. / sf)
-            break
-
-    return np.array(imageFrameTS), visualStart
-
-
-def getLog(logPath):
-    """
-    get log dictionary from a specific path (including file names)
-    """
-
-    f = open(logPath, 'r')
-    displayLog = pickle.load(f)
-    f.close()
-    return displayLog
+# def importRawJCam(path,
+#                   dtype=np.dtype('>f'),
+#                   headerLength=96,  # length of the header, measured as the data type defined above
+#                   columnNumIndex=14,  # index of number of rows in header
+#                   rowNumIndex=15,  # index of number of columns in header
+#                   frameNumIndex=16,  # index of number of frames in header
+#                   decimation=None,  # decimation number
+#                   exposureTimeIndex=17):  # index of exposure time in header, exposure time is measured in ms
+#     """
+#     import raw JCam files into np.array
+#
+#
+#         raw file format:
+#         data type: 32 bit sigle precision floating point number
+#         data format: big-endian single-precision float, high-byte-first motorola
+#         header length: 96 floating point number
+#         column number index: 14
+#         row number index: 15
+#         frame number index: 16
+#         exposure time index: 17
+#     """
+#     imageFile = np.fromfile(path, dtype=dtype, count=-1)
+#
+#     columnNum = np.int(imageFile[columnNumIndex])
+#     rowNum = np.int(imageFile[rowNumIndex])
+#
+#     if decimation is not None:
+#         columnNum /= decimation
+#         rowNum /= decimation
+#
+#     frameNum = np.int(imageFile[frameNumIndex])
+#
+#     if frameNum == 0:  # if it is a single frame image
+#         frameNum += 1
+#
+#     exposureTime = np.float(imageFile[exposureTimeIndex])
+#
+#     imageFile = imageFile[headerLength:]
+#
+#     print('width =', str(columnNum), 'pixels')
+#     print('height =', str(rowNum), 'pixels')
+#     print('length =', str(frameNum), 'frame(s)')
+#     print('exposure time =', str(exposureTime), 'ms')
+#
+#     imageFile = imageFile.reshape((frameNum, rowNum, columnNum))
+#
+#     return imageFile, exposureTime
+#
+#
+# def readBinaryFile(path,
+#                    position,
+#                    count=1,
+#                    dtype=np.dtype('>f'),
+#                    whence=os.SEEK_SET):
+#     """
+#     read arbitary part of a binary file,
+#     data type defined by dtype,
+#     start position defined by position (counts accordinating to dtype)
+#     length defined by count.
+#     """
+#
+#     f = open(path, 'rb')
+#     f.seek(position * dtype.alignment, whence)
+#     data = np.fromfile(f, dtype=dtype, count=count)
+#     f.close()
+#     return data
+#
+#
+# def readBinaryFile2(f,
+#                     position,
+#                     count=1,
+#                     dtype=np.dtype('>f'),
+#                     whence=os.SEEK_SET):
+#     """
+#     similar as readBinaryFile but without opening and closing file object
+#     """
+#     f.seek((position * dtype.alignment), whence)
+#     data = np.fromfile(f, dtype=dtype, count=count)
+#     return data
+#
+#
+# def importRawJPhys(path,
+#                    dtype=np.dtype('>f'),
+#                    headerLength=96,  # length of the header for each channel
+#                    channels=('photodiode2', 'read', 'trigger', 'photodiode'),  # name of all channels
+#                    sf=10000):  # sampling rate, Hz
+#     """
+#     import raw JPhys files into np.array
+#     one dictionary contains header for each channel
+#     the other contains values for each for each channel
+#     """
+#
+#     JPhysFile = np.fromfile(path, dtype=dtype, count=-1)
+#     channelNum = len(channels)
+#
+#     channelLength = len(JPhysFile) / channelNum
+#
+#     if len(JPhysFile) % channelNum != 0:
+#         raise ArithmeticError('Length of the file should be divisible by channel number!')
+#
+#     header = {}
+#     body = {}
+#
+#     for index, channelname in enumerate(channels):
+#         channelStart = index * channelLength
+#         channelEnd = channelStart + channelLength
+#
+#         header.update({channels[index]: JPhysFile[channelStart:channelStart + headerLength]})
+#         body.update({channels[index]: JPhysFile[channelStart + headerLength:channelEnd]})
+#
+#     body.update({'samplingRate': sf})
+#
+#     return header, body
+#
+#
+# def importRawNewJPhys(path,
+#                       dtype=np.dtype('>f'),
+#                       headerLength=96,  # length of the header for each channel
+#                       channels=('photodiode2',
+#                                 'read',
+#                                 'trigger',
+#                                 'photodiode',
+#                                 'sweep',
+#                                 'visualFrame',
+#                                 'runningRef',
+#                                 'runningSig',
+#                                 'reward',
+#                                 'licking'),  # name of all channels
+#                       sf=10000):  # sampling rate, Hz
+#     """
+#     import new style raw JPhys files into np.array
+#     one dictionary contains header for each channel
+#     the other contains values for each for each channel
+#     """
+#
+#     JPhysFile = np.fromfile(path, dtype=dtype, count=-1)
+#     channelNum = len(channels)
+#
+#     channelLength = len(JPhysFile) / channelNum
+#     #    print 'length of JPhys:', len(JPhysFile)
+#     #    print 'length of JPhys channel number:', channelNum
+#
+#     if len(JPhysFile) % channelNum != 0:
+#         raise ArithmeticError('Length of the file should be divisible by channel number!')
+#
+#     JPhysFile = JPhysFile.reshape([channelLength, channelNum])
+#
+#     headerMatrix = JPhysFile[0:headerLength, :]
+#     bodyMatrix = JPhysFile[headerLength:, :]
+#
+#     header = {}
+#     body = {}
+#
+#     for index, channelname in enumerate(channels):
+#         header.update({channels[index]: headerMatrix[:, index]})
+#         body.update({channels[index]: bodyMatrix[:, index]})
+#
+#     body.update({'samplingRate': sf})
+#
+#     return header, body
+#
+#
+# def importRawJPhys2(path,
+#                     imageFrameNum,
+#                     photodiodeThr=.95,  # threshold of photo diode signal,
+#                     dtype=np.dtype('>f'),
+#                     headerLength=96,  # length of the header for each channel
+#                     channels=('photodiode2', 'read', 'trigger', 'photodiode'),  # name of all channels
+#                     sf=10000.):  # sampling rate, Hz
+#     """
+#     extract important information from JPhys file
+#     """
+#
+#     JPhysFile = np.fromfile(path, dtype=dtype, count=-1)
+#     channelNum = len(channels)
+#
+#     channelLength = len(JPhysFile) / channelNum
+#
+#     if channelLength % 1 != 0:
+#         raise ArithmeticError('Bytes in each channel should be integer !')
+#
+#     channelLength = int(channelLength)
+#
+#     # get trace for each channel
+#     for index, channelname in enumerate(channels):
+#         channelStart = index * channelLength
+#         channelEnd = channelStart + channelLength
+#         #        if channelname == 'expose':
+#         #            expose = JPhysFile[channelStart+headerLength:channelEnd]
+#
+#         if channelname == 'read':
+#             read = JPhysFile[channelStart + headerLength:channelEnd]
+#
+#         if channelname == 'photodiode':
+#             photodiode = JPhysFile[channelStart + headerLength:channelEnd]
+#
+#         #        if channelname == 'trigger':
+#         #            trigger = JPhysFile[channelStart+headerLength:channelEnd]
+#
+#     # generate time stamp for each image frame
+#     imageFrameTS = []
+#     for i in range(1, len(read)):
+#         if read[i - 1] < 3.0 and read[i] >= 3.0:
+#             imageFrameTS.append(i * (1. / sf))
+#
+#     if len(imageFrameTS) < imageFrameNum:
+#         raise LookupError("Expose period number is smaller than image frame number!")
+#     imageFrameTS = imageFrameTS[0:imageFrameNum]
+#
+#     # first time of visual stimulation
+#     visualStart = None
+#
+#     for i in range(80, len(photodiode)):
+#         if ((photodiode[i] - photodiodeThr) * (photodiode[i - 1] - photodiodeThr)) < 0 and \
+#                         ((photodiode[i] - photodiodeThr) * (
+#                             photodiode[i - 75] - photodiodeThr)) < 0:  # first frame of big change
+#             visualStart = i * (1. / sf)
+#             break
+#
+#     return np.array(imageFrameTS), visualStart
+#
+#
+# def importRawNewJPhys2(path,
+#                        imageFrameNum,
+#                        photodiodeThr=.95,  # threshold of photo diode signal,
+#                        dtype=np.dtype('>f'),
+#                        headerLength=96,  # length of the header for each channel
+#                        channels=('photodiode2',
+#                                  'read',
+#                                  'trigger',
+#                                  'photodiode',
+#                                  'sweep',
+#                                  'visualFrame',
+#                                  'runningRef',
+#                                  'runningSig',
+#                                  'reward',
+#                                  'licking'),  # name of all channels
+#                        sf=10000.):  # sampling rate, Hz
+#     """
+#     extract important information from new style JPhys file
+#     """
+#
+#     JPhysFile = np.fromfile(path, dtype=dtype, count=-1)
+#     channelNum = len(channels)
+#
+#     channelLength = len(JPhysFile) / channelNum
+#
+#     if len(JPhysFile) % channelNum != 0:
+#         raise ArithmeticError('Length of the file should be divisible by channel number!')
+#
+#     JPhysFile = JPhysFile.reshape([channelLength, channelNum])
+#
+#     bodyMatrix = JPhysFile[headerLength:, :]
+#
+#     # get trace for each channel
+#     for index, channelname in enumerate(channels):
+#
+#         if channelname == 'read':
+#             read = bodyMatrix[:, index]
+#
+#         if channelname == 'photodiode':
+#             photodiode = bodyMatrix[:, index]
+#
+#         #        if channelname == 'trigger':
+#         #            trigger = JPhysFile[channelStart+headerLength:channelEnd]
+#
+#     # generate time stamp for each image frame
+#     imageFrameTS = []
+#     for i in range(1, len(read)):
+#         if (read[i - 1] < 3.0) and (read[i] >= 3.0):
+#             imageFrameTS.append(i * (1. / sf))
+#
+#     if len(imageFrameTS) < imageFrameNum:
+#         raise LookupError("Expose period number is smaller than image frame number!")
+#     imageFrameTS = imageFrameTS[0:imageFrameNum]
+#
+#     # first time of visual stimulation
+#     visualStart = None
+#
+#     for i in range(80, len(photodiode)):
+#         if ((photodiode[i] - photodiodeThr) * (photodiode[i - 1] - photodiodeThr)) < 0 and \
+#                         ((photodiode[i] - photodiodeThr) * (
+#                             photodiode[i - 75] - photodiodeThr)) < 0:  # first frame of big change
+#             visualStart = i * (1. / sf)
+#             break
+#
+#     return np.array(imageFrameTS), visualStart
+#
+#
+# def getLog(logPath):
+#     """
+#     get log dictionary from a specific path (including file names)
+#     """
+#
+#     f = open(logPath, 'r')
+#     displayLog = pickle.load(f)
+#     f.close()
+#     return displayLog
+#
+# def importRawJCamF(path,
+#                    saveFolder=None,
+#                    dtype=np.dtype('<u2'),
+#                    headerLength=116,
+#                    tailerLength=218,
+#                    column=2048,
+#                    row=2048,
+#                    frame=None,  # how many frame to read
+#                    crop=None):
+#     if frame:
+#         data = np.fromfile(path, dtype=dtype, count=frame * column * row + headerLength)
+#         header = data[0:headerLength]
+#         tailer = []
+#         mov = data[headerLength:].reshape((frame, column, row))
+#     else:
+#         data = np.fromfile(path, dtype=dtype)
+#         header = data[0:headerLength]
+#         tailer = data[len(data) - tailerLength:len(data)]
+#         frame = (len(data) - headerLength - tailerLength) / (column * row)
+#         mov = data[headerLength:len(data) - tailerLength].reshape((frame, column, row))
+#
+#     if saveFolder:
+#         if crop:
+#             try:
+#                 mov = mov[:, crop[0]:crop[1], crop[2]:crop[3]]
+#                 fileName = path.split('\\')[-1] + '_cropped.tif'
+#             except Exception as e:
+#                 print('importRawJCamF: Can not understant the paramenter "crop":' + str(crop) + \
+#                       '\ncorp should be: [rowStart,rowEnd,colStart,colEnd]')
+#                 print('\nTrace back: \n' + e)
+#         else:
+#             fileName = path.split('\\')[-1] + '.tif'
+#
+#         tf.imsave(os.path.join(saveFolder, fileName), mov)
+#
+#     return mov, header, tailer
 
 
 def generateAVI(saveFolder,
@@ -483,44 +520,6 @@ def generateAVI(saveFolder,
     cv2.destroyAllWindows()
 
 
-def importRawJCamF(path,
-                   saveFolder=None,
-                   dtype=np.dtype('<u2'),
-                   headerLength=116,
-                   tailerLength=218,
-                   column=2048,
-                   row=2048,
-                   frame=None,  # how many frame to read
-                   crop=None):
-    if frame:
-        data = np.fromfile(path, dtype=dtype, count=frame * column * row + headerLength)
-        header = data[0:headerLength]
-        tailer = []
-        mov = data[headerLength:].reshape((frame, column, row))
-    else:
-        data = np.fromfile(path, dtype=dtype)
-        header = data[0:headerLength]
-        tailer = data[len(data) - tailerLength:len(data)]
-        frame = (len(data) - headerLength - tailerLength) / (column * row)
-        mov = data[headerLength:len(data) - tailerLength].reshape((frame, column, row))
-
-    if saveFolder:
-        if crop:
-            try:
-                mov = mov[:, crop[0]:crop[1], crop[2]:crop[3]]
-                fileName = path.split('\\')[-1] + '_cropped.tif'
-            except Exception as e:
-                print('importRawJCamF: Can not understant the paramenter "crop":' + str(crop) + \
-                      '\ncorp should be: [rowStart,rowEnd,colStart,colEnd]')
-                print('\nTrace back: \n' + e)
-        else:
-            fileName = path.split('\\')[-1] + '.tif'
-
-        tf.imsave(os.path.join(saveFolder, fileName), mov)
-
-    return mov, header, tailer
-
-
 def int2str(num, length=None):
     """
     generate a string representation for a integer with a given length
@@ -557,6 +556,40 @@ class Logger(object):
 
         log_file.close()
 
+    def get_frame_config(self, input_dict):
+        """
+        find the frame configuration
+
+        Parameters
+        ----------
+        input_dict: input dictionary
+
+        Returns
+        -------
+        frame_config: list of str representing frame configuration, None if not find
+
+        """
+
+        for key, value in input_dict.items():
+
+            if key == 'frame_config':
+                return value
+            elif not isinstance(value, dict):
+                continue
+            else:
+                ans = self.get_frame_config(value)
+                if ans is None:
+                    continue
+                else:
+                    return ans
+        return None
+
+    def write_frames(self, h5_grp, key, frame_list):
+
+        #todo: finish this
+        frame_config = self.get_frame_config(self.log_dict)
+        print(frame_config)
+
     def write_dict(self, h5_grp, value, key="unknown"):
 
         if isinstance(value, dict):
@@ -566,6 +599,8 @@ class Logger(object):
         else:
             if value is None:
                 h5_grp.create_dataset(name=str(key), data='None')
+            elif key=='frames' or key == 'frames_unique': # handle frame list
+                self.write_frames(h5_grp=h5_grp, key=key, frame_list=value)
             else:
                 try:
                     h5_grp.create_dataset(name=str(key), data=value)
