@@ -47,8 +47,26 @@ class TestLogger(unittest.TestCase):
         logger.save_log()
         logger.save_log()
 
-        _ = [os.remove(os.path.join(self.save_folder, f)) for f in
-             os.listdir(self.save_folder) if 'test_log' in f and f[-5:] == '.hdf5']
+        # _ = [os.remove(os.path.join(self.save_folder, f)) for f in
+        #      os.listdir(self.save_folder) if 'test_log' in f and f[-5:] == '.hdf5']
+
+    def test_save_locally_sparse_noise(self):
+
+        lsn = stim.LocallySparseNoise(monitor=self.mon, indicator=self.ind,
+                                      min_distance=20., background=0., coordinate='degree',
+                                      grid_space=(10., 10.), probe_size=(10., 10.),
+                                      probe_orientation=0., probe_frame_num=6, subregion=[-10., 10., 0., 30.],
+                                      sign='ON', iteration=1, pregap_dur=0.1, postgap_dur=0.2,
+                                      is_include_edge=True, repeat=1)
+
+        seq_lsn, dict_lsn = lsn.generate_movie_by_index()
+
+        save_path = os.path.join(self.save_folder, 'LSN_log.hdf5')
+        logger = gt.Logger(log_dict=dict_lsn, save_path=save_path)
+        logger.save_log()
+
+        # _ = [os.remove(os.path.join(self.save_folder, f)) for f in
+        #      os.listdir(self.save_folder) if 'LSN_log' in f and f[-5:] == '.hdf5']
 
     def test_save_log_uc(self):
 
@@ -57,5 +75,14 @@ class TestLogger(unittest.TestCase):
 
         self.player.set_stim(uc)
         self.player.trigger_display()
+
+        fns = [f for f in os.listdir(os.path.join(self.save_folder, 'visual_display_log'))
+               if 'UniformContrast-MTest-Name-000-notTriggered-complete.hdf5' in f]
+
+        for fn in fns:
+            print('deleting {} ...'.format(fn))
+            os.remove(os.path.join(self.save_folder, 'visual_display_log', fn))
+
+
 
 

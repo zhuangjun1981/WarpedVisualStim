@@ -1782,11 +1782,11 @@ class LocallySparseNoise(Stim):
         `'OFF'` is selected only off (black) pixels are displayed in the noise
     iteration : int, optional
         number of times to present stimulus with random order, the total number
-        a paticular probe will be displayded will be iteration * repeat,
-        defaults to `1`
+        a paticular probe will be displayded will be iteration * repeat, for
+        each iteration, a new sequence will be generated. defaults to `1`
     repeat : int, optional
         number of repeat of whole sequence, the total number a paticular probe
-        will be displayded will be iteration * repeat, defaults to `1`
+        to be displayded will be iteration * repeat, defaults to `1`
     is_include_edge : bool, default True,
         if True, the displayed probes will cover the edge case and ensure that
         the entire subregion is covered.
