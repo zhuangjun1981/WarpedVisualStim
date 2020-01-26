@@ -417,10 +417,12 @@ class DisplaySequence(object):
             self.frame_duration, self.frame_stats = \
                 analyze_frames(ts_start=self.frame_ts_start, ts_end=self.frame_ts_end, refresh_rate=60.)
 
-        self.save_log()
+        save_path, log_dict = self.save_log()
 
         # clear display data
         self.clear()
+
+        return save_path, log_dict
 
     def _wait_for_trigger(self, event):
         """
@@ -663,13 +665,13 @@ class DisplaySequence(object):
         displayLog.pop('sequence')
         log_dict.update({'presentation': displayLog})
 
-        file_name = self.file_name + ".hdf5"
+        file_name = self.file_name + ".pkl"
 
         # generate full log dictionary
         path = os.path.join(directory, file_name)
-        # ft.saveFile(path, logFile)
-        logger = ft.Logger(log_dict=log_dict, save_path=path)
-        logger.save_log()
+        ft.saveFile(path, log_dict)
+        # logger = ft.Logger(log_dict=log_dict, save_path=path)
+        # logger.save_log()
 
         print("\nLog file generated successfully. Log file path: ")
         print('{}'.format(path))
@@ -684,9 +686,9 @@ class DisplaySequence(object):
             if not (os.path.isdir(backupFileFolder)):
                 os.makedirs(backupFileFolder)
             backupFilePath = os.path.join(backupFileFolder, file_name)
-            # ft.saveFile(backupFilePath, logFile)
-            backup_logger = ft.Logger(log_dict=log_dict, save_path=backupFilePath)
-            backup_logger.save_log()
+            ft.saveFile(backupFilePath, log_dict)
+            # backup_logger = ft.Logger(log_dict=log_dict, save_path=backupFilePath)
+            # backup_logger.save_log()
 
             if self.is_save_sequence:
                 tf.imsave(os.path.join(backupFileFolder, self.file_name + '.tif'),
@@ -695,6 +697,8 @@ class DisplaySequence(object):
             print('{}'.format(backupFilePath))
         else:
             print("\nDid not find backup path, no backup was saved.")
+
+        return path, log_dict
 
     def _get_backup_folder(self):
         if self.backupdir is not None:

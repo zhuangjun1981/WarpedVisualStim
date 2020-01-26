@@ -33,6 +33,7 @@ ind_freq = 1.
 
 # ============================ DisplaySequence ====================================
 ds_log_dir = r'C:\data'
+# ds_log_dir = '/home/zhuangjun1981'
 ds_backupdir = None
 ds_identifier = 'TEST'
 ds_display_iter = 1
@@ -117,7 +118,7 @@ lsn_is_include_edge = True
 dgc_center = (10., 90.)
 dgc_sf_list = (0.01, 0.16)
 dgc_tf_list = (2., 8.,)
-dgc_dire_list = np.arange(0., 360., 90.)
+dgc_dire_list = np.arange(0., 360., 180.)
 dgc_con_list = (0.8,)
 dgc_radius_list = (30.,)
 dgc_block_dur = 1.
@@ -132,7 +133,7 @@ dgc_is_random_start_phase = False
 
 # ============================ StaticGratingCirlce ================================
 sgc_center = (0., 40.)
-sgc_sf_list = (0.08,)
+sgc_sf_list = (0.08, 0.16)
 sgc_ori_list = (0., 90.)
 sgc_con_list = (0.5,)
 sgc_radius_list = (25.,)
@@ -313,6 +314,22 @@ cs.set_stimuli(stimuli=stim_seq, static_images_path=static_images_path)
 
 # =============================== display =========================================
 ds.set_stim(cs)
-ds.trigger_display()
+log_path, log_dict = ds.trigger_display()
+# =============================== display =========================================
+
+
+# =============================== convert log to .nwb =============================
+import os
+import WarpedVisualStim.DisplayLogAnalysis as dla
+import NeuroAnalysisTools.NwbTools as nt
+log_folder, log_fn = os.path.split(log_path)
+log_nwb_path = os.path.splitext(log_path)[0] + '.nwb'
+save_f = nt.RecordedFile(filename=log_nwb_path, identifier=os.path.splitext(log_fn)[0], description='')
+stim_log = dla.DisplayLogAnalyzer(log_path)
+save_f.add_visual_display_log_retinotopic_mapping(stim_log=stim_log)
+save_f.close()
+# =============================== convert log to .nwb =============================
+
+# =============================== show plot========================================
 plt.show()
 # =================================================================================

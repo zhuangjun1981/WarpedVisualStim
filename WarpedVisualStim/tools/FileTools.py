@@ -19,15 +19,15 @@ except ImportError as e:
     print('can not import OpenCV. \n{}'.format(e))
 
 
-# def saveFile(path, data):
-#     with open(path, 'wb') as f:
-#         pickle.dump(data, f, protocol=2)
-#
-#
-# def loadFile(path):
-#     with open(path, 'rb') as f:
-#         data = pickle.load(f, encoding='bytes')
-#     return data
+def saveFile(path, data):
+    with open(path, 'wb') as f:
+        pickle.dump(data, f, protocol=2)
+
+
+def loadFile(path):
+    with open(path, 'rb') as f:
+        data = pickle.load(f, encoding='bytes')
+    return data
 
 
 def copy(src, dest):
@@ -537,80 +537,80 @@ def int2str(num, length=None):
         return '0' * (length - len(rawstr)) + rawstr
 
 
-class Logger(object):
-
-    def __init__(self, log_dict, save_path):
-
-        self.log_dict = log_dict
-        self.save_path = save_path
-
-    def save_log(self):
-
-        if os.path.isfile(self.save_path):
-            save_name, save_ext = os.path.splitext(self.save_path)
-            t_str = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-            self.save_path = '{}_{}{}'.format(save_name, t_str, save_ext)
-
-        log_file = h5py.File(self.save_path, 'x')
-        self.write_dict(h5_grp=log_file, value=self.log_dict, key="visual_display_log")
-
-        log_file.close()
-
-    def get_frame_config(self, input_dict):
-        """
-        find the frame configuration
-
-        Parameters
-        ----------
-        input_dict: input dictionary
-
-        Returns
-        -------
-        frame_config: list of str representing frame configuration, None if not find
-
-        """
-
-        for key, value in input_dict.items():
-
-            if key == 'frame_config':
-                return value
-            elif not isinstance(value, dict):
-                continue
-            else:
-                ans = self.get_frame_config(value)
-                if ans is None:
-                    continue
-                else:
-                    return ans
-        return None
-
-    def write_frames(self, h5_grp, key, frame_list):
-
-        #todo: finish this
-        frame_config = self.get_frame_config(self.log_dict)
-        print(frame_config)
-
-    def write_dict(self, h5_grp, value, key="unknown"):
-
-        if isinstance(value, dict):
-            next_grp = h5_grp.create_group(str(key))
-            for next_key, next_value in value.items():
-                self.write_dict(h5_grp=next_grp, value=next_value, key=next_key)
-        else:
-            if value is None:
-                h5_grp.create_dataset(name=str(key), data='None')
-            elif key=='frames' or key == 'frames_unique': # handle frame list
-                self.write_frames(h5_grp=h5_grp, key=key, frame_list=value)
-            else:
-                try:
-                    h5_grp.create_dataset(name=str(key), data=value)
-                except TypeError:
-                    try:
-                        new_value = np.array(value, dtype='S')
-                        h5_grp.create_dataset(name=str(key), data=new_value)
-                    except Exception as e:
-                        print('Failed to save field: {}. Skip!'.format(key))
-                        print(e)
+# class Logger(object):
+#
+#     def __init__(self, log_dict, save_path):
+#
+#         self.log_dict = log_dict
+#         self.save_path = save_path
+#
+#     def save_log(self):
+#
+#         if os.path.isfile(self.save_path):
+#             save_name, save_ext = os.path.splitext(self.save_path)
+#             t_str = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+#             self.save_path = '{}_{}{}'.format(save_name, t_str, save_ext)
+#
+#         log_file = h5py.File(self.save_path, 'x')
+#         self.write_dict(h5_grp=log_file, value=self.log_dict, key="visual_display_log")
+#
+#         log_file.close()
+#
+#     def get_frame_config(self, input_dict):
+#         """
+#         find the frame configuration
+#
+#         Parameters
+#         ----------
+#         input_dict: input dictionary
+#
+#         Returns
+#         -------
+#         frame_config: list of str representing frame configuration, None if not find
+#
+#         """
+#
+#         for key, value in input_dict.items():
+#
+#             if key == 'frame_config':
+#                 return value
+#             elif not isinstance(value, dict):
+#                 continue
+#             else:
+#                 ans = self.get_frame_config(value)
+#                 if ans is None:
+#                     continue
+#                 else:
+#                     return ans
+#         return None
+#
+#     def write_frames(self, h5_grp, key, frame_list):
+#
+#         #todo: finish this
+#         frame_config = self.get_frame_config(self.log_dict)
+#         print(frame_config)
+#
+#     def write_dict(self, h5_grp, value, key="unknown"):
+#
+#         if isinstance(value, dict):
+#             next_grp = h5_grp.create_group(str(key))
+#             for next_key, next_value in value.items():
+#                 self.write_dict(h5_grp=next_grp, value=next_value, key=next_key)
+#         else:
+#             if value is None:
+#                 h5_grp.create_dataset(name=str(key), data='None')
+#             elif key=='frames' or key == 'frames_unique': # handle frame list
+#                 self.write_frames(h5_grp=h5_grp, key=key, frame_list=value)
+#             else:
+#                 try:
+#                     h5_grp.create_dataset(name=str(key), data=value)
+#                 except TypeError:
+#                     try:
+#                         new_value = np.array(value, dtype='S')
+#                         h5_grp.create_dataset(name=str(key), data=new_value)
+#                     except Exception as e:
+#                         print('Failed to save field: {}. Skip!'.format(key))
+#                         print(e)
 
 
 # ==============================  obsolete  =========================================
