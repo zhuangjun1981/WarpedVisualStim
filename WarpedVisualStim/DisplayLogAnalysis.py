@@ -8,7 +8,6 @@ import numpy as np
 from .tools import FileTools as ft
 from .tools import GenericTools as gt
 
-# todo: make this to work with .hdf5 logs
 class DisplayLogAnalyzer(object):
     """
     class to take display_log (.pkl) file, check its integrity and extract stimuli and display

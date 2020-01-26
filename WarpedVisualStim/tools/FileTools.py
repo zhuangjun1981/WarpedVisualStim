@@ -556,40 +556,6 @@ def int2str(num, length=None):
 #
 #         log_file.close()
 #
-#     def get_frame_config(self, input_dict):
-#         """
-#         find the frame configuration
-#
-#         Parameters
-#         ----------
-#         input_dict: input dictionary
-#
-#         Returns
-#         -------
-#         frame_config: list of str representing frame configuration, None if not find
-#
-#         """
-#
-#         for key, value in input_dict.items():
-#
-#             if key == 'frame_config':
-#                 return value
-#             elif not isinstance(value, dict):
-#                 continue
-#             else:
-#                 ans = self.get_frame_config(value)
-#                 if ans is None:
-#                     continue
-#                 else:
-#                     return ans
-#         return None
-#
-#     def write_frames(self, h5_grp, key, frame_list):
-#
-#         #todo: finish this
-#         frame_config = self.get_frame_config(self.log_dict)
-#         print(frame_config)
-#
 #     def write_dict(self, h5_grp, value, key="unknown"):
 #
 #         if isinstance(value, dict):
@@ -599,8 +565,6 @@ def int2str(num, length=None):
 #         else:
 #             if value is None:
 #                 h5_grp.create_dataset(name=str(key), data='None')
-#             elif key=='frames' or key == 'frames_unique': # handle frame list
-#                 self.write_frames(h5_grp=h5_grp, key=key, frame_list=value)
 #             else:
 #                 try:
 #                     h5_grp.create_dataset(name=str(key), data=value)
