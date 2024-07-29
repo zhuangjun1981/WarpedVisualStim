@@ -4302,3 +4302,128 @@ class KSstimAllDir(object):
                                               'sweepEndCoordinate')
 
         return mov, log
+
+
+#%%
+class KSstimSeqDir(object):
+    """
+    generate Kalatsky & Stryker stimulation in direction sequence as specified
+
+    Parameters
+    ----------
+    monitor : monitor object
+        contains display monitor information
+    indicator : indicator object
+        contains indicator information
+    direction : list of str
+        list of directions, each can be one of {'B2U', 'U2B', 'L2R', 'R2L'}
+    coordinate : str from {'degree','linear'}, optional
+        specifies coordinates, defaults to 'degree'
+    background : float, optional
+        color of background. Takes values in [-1,1] where -1 is black and 1
+        is white
+    square_size : int, optional
+        size of flickering square, defaults to 25.
+    square_center : tuple, optional
+        coordinate of center point of the square, defaults to (0,0)
+    flicker_frame : int, optional
+        number of frames per flicker while stimulus is being presented,
+        defaults to `6`
+    sweep_width : float, optional
+        width of sweeps. defaults to `20.`
+    step_width : float, optional
+        width of steps. defaults to `0.15`.
+    sweep_frame : int, optional
+        roughly determines speed of the drifting grating, defaults to `1`
+    iteration : int, optional
+        number of times stimulus will be presented, defaults to `1`
+    pregap_dur : float, optional
+        number of seconds before stimulus is presented, defaults to `2.`
+    postgap_dur : float, optional
+        number of seconds after stimulus is presented, defaults to `3.`
+    """
+
+    def __init__(self, monitor, indicator, direction, coordinate='degree', background=0.,
+                 square_size=25, square_center=(0, 0), flicker_frame=6, sweep_width=20.,
+                 step_width=0.15, sweep_frame=1, iteration=1, pregap_dur=2.,
+                 postgap_dur=3.):
+        """
+        Initialize stimulus object
+        """
+
+        self.stim_name = 'KSstimSeqDir'
+        self.monitor = monitor
+        self.indicator = indicator
+        self.direction = direction
+        self.background = background
+        self.coordinate = coordinate
+        self.square_size = square_size
+        self.square_center = square_center
+        self.flicker_frame = flicker_frame
+        self.sweep_width = sweep_width
+        self.step_width = step_width
+        self.sweep_frame = sweep_frame
+        self.iteration = iteration
+        self.pregap_dur = pregap_dur
+        self.postgap_dur = postgap_dur
+
+    def generate_movie(self):
+        """
+        Generate stimulus movie frame by frame based on the specified directions
+        """
+        KS_stim = KSstim(self.monitor,
+                         self.indicator,
+                         background=self.background,
+                         coordinate=self.coordinate,
+                         direction=self.direction[0],  # Initial direction
+                         square_size=self.square_size,
+                         square_center=self.square_center,
+                         flicker_frame=self.flicker_frame,
+                         sweep_width=self.sweep_width,
+                         step_width=self.step_width,
+                         sweep_frame=self.sweep_frame,
+                         iteration=self.iteration,
+                         pregap_dur=self.pregap_dur,
+                         postgap_dur=self.postgap_dur)
+
+        mov_list = []
+        sweep_table = []
+        frames = []
+        sweep_length_accum = 0
+
+        for dir in self.direction:
+            KS_stim.set_direction(dir)
+            curr_mov, curr_dict = KS_stim.generate_movie()
+            mov_list.append(curr_mov)
+
+            curr_sweep_table = curr_dict['stimulation']['sweep_table']
+            curr_frames = curr_dict['stimulation']['frames']
+
+            curr_sweep_table = [[dir, x[1], x[2]] for x in curr_sweep_table]
+            curr_frames = [[x[0], x[1], x[2], x[3], dir] for x in curr_frames]
+
+            if sweep_length_accum > 0:
+                for frame in curr_frames:
+                    if frame[2] is not None:
+                        frame[2] += sweep_length_accum
+
+            sweep_table += curr_sweep_table
+            frames += curr_frames
+            sweep_length_accum += len(curr_sweep_table)
+
+        mov = np.vstack(mov_list)
+        log = {
+            'monitor': curr_dict['monitor'],
+            'indicator': curr_dict['indicator'],
+            'stimulation': {
+                'stim_name': 'KSstimSeqDir',
+                'direction': self.direction,
+                'frames': [tuple(x) for x in frames],
+                'sweep_table': [tuple(x) for x in sweep_table],
+                'frame_config': ('is_display', 'squarePolarity', 'sweep_index', 'indicator_color'),
+                'sweep_config': ('orientation', 'sweepStartCoordinate', 'sweepEndCoordinate')
+            }
+        }
+
+        return mov, log
+
