@@ -120,7 +120,7 @@ all_dir = ['B2U', 'U2B', 'L2R', 'R2L']
 dir_seq = [all_dir[dir_index] for dir_index in dir_index_seq]
 
 
-#%% ============================== KSstimAllDir =====================================
+#%% ============================== KSstimSeqDir =====================================
 ks = stim.KSstimSeqDir(monitor=mon, indicator=ind, direction=dir_seq, pregap_dur=pregap_dur, postgap_dur=postgap_dur,
                        background=background, coordinate=coordinate, square_size=ks_square_size,
                        square_center=ks_square_center, flicker_frame=ks_flicker_frame,
