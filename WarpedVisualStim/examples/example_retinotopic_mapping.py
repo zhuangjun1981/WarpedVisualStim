@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Example script to test StimulusRoutines.CombinedStimuli class
+Example script to test StimulusRoutines.KSstimAllDir class
 """
 
 import matplotlib.pyplot as plt
