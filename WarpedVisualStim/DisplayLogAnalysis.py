@@ -116,7 +116,7 @@ class DisplayLogAnalyzer(object):
             stim_name = self.log_dict['stimulation']['stim_name']
             if stim_name in ['UniformContrast', 'FlashingCircle', 'SparseNoise', 'LocallySparseNoise',
                              'DriftingGratingCirlce', 'StaticGratingCircle', 'StaticImages', 'StimulusSeparator',
-                             'SinusoidalLuminance']:
+                             'SinusoidalLuminance', 'DriftingGratingMultipleCircle']:
                 curr_stim_name = '{:03d}_{}RetinotopicMapping'.format(0, stim_name)
                 curr_dict = self.log_dict['stimulation']
                 curr_dict['stim_name'] = curr_stim_name
@@ -240,6 +240,16 @@ class DisplayLogAnalyzer(object):
                 elif curr_stim_n[-38:] == '_SinusoidalLuminanceRetinotopicMapping':
                     str_sl = 'onset'
                     curr_pd_onset.update({'str_stim': str_sl})
+                elif curr_stim_n[-48:] == '_DriftingGratingMultipleCircleRetinotopicMapping':
+                    str_dgc = 'alt{:06.1f}_azi{:06.1f}_sf{:04.2f}_tf{:04.1f}_dire{:03d}_con{:04.2f}_rad{:03d}'\
+                        .format(onset_frame[7][0],
+                                onset_frame[7][1],
+                                onset_frame[2],
+                                onset_frame[3],
+                                int(onset_frame[4]),
+                                onset_frame[5],
+                                int(onset_frame[6]))
+                    curr_pd_onset.update({'str_stim': str_dgc})
                 else:
                     raise LookupError('Do not understand stimulus name: {}'.format(curr_stim_n))
 
@@ -298,7 +308,8 @@ class DisplayLogAnalyzer(object):
                 curr_pd_onsets_com.update(self._analyze_pd_onset_combined_general(curr_pd_onsets_seq))
             elif stim_n[-37:] == '_LocallySparseNoiseRetinotopicMapping':
                 curr_pd_onsets_com.update(self._analyze_pd_onset_combined_locally_sparse_noise(curr_pd_onsets_seq))
-            elif stim_n[-40:] == '_DriftingGratingCircleRetinotopicMapping':
+            elif (stim_n[-40:] == '_DriftingGratingCircleRetinotopicMapping') \
+                or (stim_n[-48:] == '_DriftingGratingMultipleCircleRetinotopicMapping'):
                 dgc_pd_onsets_com = self._analyze_pd_onset_combined_drifting_grating_circle(curr_pd_onsets_seq)
 
                 if is_dgc_blocked:
