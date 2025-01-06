@@ -7,6 +7,9 @@ import shutil
 import h5py
 import datetime
 from . import ImageAnalysis as ia
+import os
+import argparse
+from pathlib import Path
 
 try:
     import tifffile as tf
@@ -635,6 +638,19 @@ def int2str(num, length=None):
 #
 #    return mov
 
+def validate_file(f):
+    if not os.path.exists(f):
+        # Argparse uses the ArgumentTypeError to give a rejection message like:
+        # error: argument input: x does not exist
+        raise argparse.ArgumentTypeError("{0} does not exist".format(f))
+    return get_abspath(f)
+
+def get_abspath(relpath_from_this_file, pathlib=True):
+    base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if pathlib:
+        return Path(os.path.abspath(os.path.join(base, relpath_from_this_file)))
+    else:
+        return os.path.abspath(os.path.join(base, relpath_from_this_file))
 
 if __name__ == '__main__':
     # ----------------------------------------------------------------------------
