@@ -21,13 +21,14 @@ significant flexibility and control in creative experimental design.
 It can also interact with a National Instrument equipment to receive 
 trigger and emit timing signals.
   
-Please check the '\examples\visual_stimulation' folder for
-example script `example_stimulation.py` of visual stimulation.
+Please check the '\examples' folder for
+example scripts of visual stimulation.
 
 ### Contributors:
 * Jun Zhuang @zhuangj
 * John Yearseley @yearsj
 * Derric Williams @derricw
+* Sumiya Kuroda @sumiya-kuroda
 
 ### Level of support
 We are planning on occasional updating this tool with no fixed schedule. Community involvement is encouraged through both issues and pull requests.
